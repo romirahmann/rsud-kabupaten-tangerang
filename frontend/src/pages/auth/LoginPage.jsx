@@ -81,8 +81,9 @@ export function LoginPage() {
           {/* BRAND SECTION */}
           <div className="hidden md:flex flex-col justify-center items-center bg-transparent/70 text-white p-10 ">
             <div className="text-center mt-6">
-              <h1 className="font-extrabold text-4xl">
-                APLICATION DOCUMENT MANAGER
+              <h1 className="font-extrabold text-4xl">INTEKA</h1>
+              <h1 className="font-extrabold text-2xl">
+                "Aplikasi Document Manager"
               </h1>
               <h2 className="text-lg mt-2">RSUD KABUPATEN TANGERANG</h2>
             </div>

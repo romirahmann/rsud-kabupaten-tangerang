@@ -13,9 +13,23 @@ const insertData = api.catchAsync(async (req, res) => {
   let result = await model.insert(data);
   return api.success(res, { message: "Add Successfully", result });
 });
-
-const insertFromMinio = api.catchAsync(async (filePath) => {
-  console.log(filePath);
+const updateData = api.catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+  let result = await model.update(id, data);
+  return api.success(res, { message: "Add Successfully", result });
 });
 
-module.exports = { getAllMetaData, insertData };
+const getSearchMeta = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+
+    const data = await model.searchMetaData(search);
+
+    return api.success(res, data);
+  } catch (err) {
+    return api.error(res, err, 500);
+  }
+};
+
+module.exports = { getAllMetaData, insertData, getSearchMeta, updateData };

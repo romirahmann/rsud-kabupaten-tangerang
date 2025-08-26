@@ -9,9 +9,11 @@ import { Toolbar } from "../../components/Toolbar";
 import { TableHomepage } from "../../components/homepage/TableHomepage";
 import { Modal } from "../../shared/Modal";
 import { UploadFolderForm } from "../../components/homepage/UploadFolderForm";
+import { UploadFileForm } from "../../components/modal/UploadFileForm";
+import { DeleteConfirmation } from "../../components/modal/DeleteConfirm";
+import { EditMetaDataForm } from "../../components/modal/EditMetaData";
 
 export function HomePage() {
-  const [menuIsActive, setMenuIsActive] = useState("payable");
   const [modalOpen, setModalOpen] = useState({
     showUploadFile: false,
     showUploadFolder: false,
@@ -31,15 +33,23 @@ export function HomePage() {
   // FETCH DATA
   const fetchDocument = async () => {
     try {
-      let result = await api.get(`/master/documents/${""}`);
-      // console.log(api);
+      let result = await api.get(`/master/documents`);
+
       setDocuments(result.data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleOnSearch = async (query) => {};
+  const handleOnSearch = async (query) => {
+    try {
+      let result = await api.get(`/master/document-search?search=${query}`);
+
+      setDocuments(result.data.data);
+    } catch (error) {
+      console.log(error.response.data);
+    }
+  };
 
   const handleOnFilter = async (filter) => {};
 
@@ -140,6 +150,7 @@ export function HomePage() {
         message: "Folder uploaded successfully",
         type: "success",
       });
+      fetchDocument();
     } catch (error) {
       setAlert({
         show: true,
@@ -151,6 +162,114 @@ export function HomePage() {
   };
 
   // Handle Upload File
+  const handleUploadFile = async (data) => {
+    if (!data) {
+      setAlert({
+        show: true,
+        message: "Data Not Found!",
+        type: "warning",
+      });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("tanggalScan", data.tanggalScan);
+      formData.append("noMr", data.noMr);
+      formData.append("namaPasien", data.namaPasien); // ✅ tambahin di sini
+      formData.append("tglLahir", data.tglLahir);
+      formData.append("jenisDokumen", data.jenisDokumen);
+      formData.append("fileName", data.fileName);
+      formData.append("kategori", data.kategori);
+      formData.append("layanan", data.layanan);
+      formData.append("file", data.file);
+
+      // // 🔎 cek isi formData sebelum upload
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(key, value);
+      // }
+
+      // kirim ke API
+      await api.post(`/upload-file`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setModalOpen({ ...modalOpen, showUploadFile: false });
+      setAlert({
+        show: true,
+        message: "File uploaded successfully",
+        type: "success",
+      });
+
+      fetchDocument();
+    } catch (error) {
+      setAlert({
+        show: true,
+        message: "File upload failed",
+        type: "error",
+      });
+      console.log(error.response || error);
+    }
+  };
+
+  const handleDeleted = async () => {
+    // console.log(selectedDoc);
+    try {
+      await api.delete(
+        `/master/delete-file?id=${selectedDoc.id}&path=${selectedDoc.filePath}`
+      );
+      setModalOpen({ showDelete: false });
+      setAlert({
+        show: true,
+        message: "Deleted Successfully!",
+        type: "success",
+      });
+      fetchDocument();
+    } catch (error) {
+      console.log(error);
+      setAlert({
+        show: true,
+        message: "Deleted Failed!",
+        type: "error",
+      });
+    }
+  };
+
+  const handleUpdate = async (data) => {
+    if (!selectedDoc) {
+      setAlert({
+        show: true,
+        type: "warning",
+        message: "Please select a document to update",
+      });
+      return;
+    }
+
+    try {
+      // Kirim update ke API (pakai id dari selectedDoc)
+      await api.put(`/master/document/${selectedDoc.id}`, {
+        ...data,
+      });
+
+      setModalOpen({ ...modalOpen, showEdit: false });
+      setAlert({
+        show: true,
+        type: "success",
+        message: "Document updated successfully!",
+      });
+
+      fetchDocument(); // refresh data table
+    } catch (error) {
+      console.log(error.response || error);
+      setAlert({
+        show: true,
+        type: "error",
+        message: "Update failed!",
+      });
+    }
+  };
 
   const variants = {
     initial: { opacity: 0, y: 10 },
@@ -165,6 +284,7 @@ export function HomePage() {
           openModal={handleOpenModal}
           onFilter={handleOnFilter}
           querySearch={handleOnSearch}
+          isHomepage={true}
         />
         <div className="mainContent mt-5">
           <div className="mainContent dark:bg-gray-900 bg-white rounded-b-lg p-5">
@@ -192,12 +312,34 @@ export function HomePage() {
         </div>
 
         {/* MODALS */}
+        {/* Modal Upload */}
+        <Modal
+          isOpen={modalOpen.showUploadFile}
+          title="Upload File"
+          onClose={() => setModalOpen({ showUploadFile: false })}
+        >
+          <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
+        </Modal>
         <Modal
           isOpen={modalOpen.showUploadFolder}
           title="Upload Folder"
           onClose={() => setModalOpen({ showUploadFolder: false })}
         >
           <UploadFolderForm onUpload={(files) => handleUploadFolder(files)} />
+        </Modal>
+        <Modal
+          isOpen={modalOpen.showEdit}
+          title="Edit Data"
+          onClose={() => setModalOpen({ showEdit: false })}
+        >
+          <EditMetaDataForm initialData={selectedDoc} onSubmit={handleUpdate} />
+        </Modal>
+        <Modal
+          isOpen={modalOpen.showDelete}
+          title="Delete Data"
+          onClose={() => setModalOpen({ showDelete: false })}
+        >
+          <DeleteConfirmation onDelete={() => handleDeleted()} />
         </Modal>
         {/* ALERTS */}
         {alert.show && (

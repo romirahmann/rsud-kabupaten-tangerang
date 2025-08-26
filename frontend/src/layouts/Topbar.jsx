@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useDarkMode } from "../store/ThemeContext";
 import { MdOutlineDarkMode, MdOutlineWbSunny } from "react-icons/md";
-import { FaRegUserCircle } from "react-icons/fa";
+import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
 import { useAuth } from "../store/AuthContext";
+import { Link } from "@tanstack/react-router";
 export function Topbar({ userData }) {
   const [profilIsOpen, setProfilIsOpen] = useState(false);
   const { theme, toggleTheme } = useDarkMode();
@@ -35,9 +36,7 @@ export function Topbar({ userData }) {
           <div className="brand flex gap-2 items-center">
             <img src="/images/logo.png" className="w-[3em]" alt="" />
             <div>
-              <h1 className="text-2xl font-bold text-[#FADA7A]">
-                DOCUMENT MANAGER
-              </h1>
+              <h1 className="text-2xl font-bold text-[#FADA7A]">INTEKA</h1>
               <h3 className="text-sm text-[#F5F0CD]">
                 RSUD Kabupaten Tangerang
               </h3>
@@ -70,6 +69,13 @@ export function Topbar({ userData }) {
                 <h3 className="text-sm uppercase">{userData?.roleName}</h3>
               </div>
               <hr className="my-2" />
+              <Link
+                to={"/users"}
+                className="flex text-center my-2 items-center gap-1 rounded-md "
+              >
+                <FaUser />
+                <span className="">Manage Users</span>
+              </Link>
               <button
                 onClick={() => handleLogout()}
                 className="flex text-center items-center gap-1 rounded-md "

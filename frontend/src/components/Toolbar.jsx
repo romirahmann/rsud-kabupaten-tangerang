@@ -1,17 +1,9 @@
 /* eslint-disable no-unused-vars */
-import {
-  FaCloudUploadAlt,
-  FaEdit,
-  FaEye,
-  FaFileUpload,
-  FaFolderPlus,
-  FaUpload,
-} from "react-icons/fa";
+import { FaEdit, FaEye, FaFileUpload, FaUpload, FaTrash } from "react-icons/fa";
 import { Search } from "../shared/Search";
-
 import { useEffect, useState } from "react";
 
-export function Toolbar({ openModal, querySearch }) {
+export function Toolbar({ openModal, querySearch, isHomepage = false }) {
   const [userLogin, setUserLogin] = useState([]);
 
   useEffect(() => {
@@ -31,29 +23,81 @@ export function Toolbar({ openModal, querySearch }) {
             {/* VIEW */}
             <div className="toolItem">
               <button
-                onClick={() => openModal("VIEW")}
-                className="border border-primary hover:bg-primary hover:text-white p-2 text-xl rounded-md text-blue-900 dark:border-secondary dark:text-white"
+                onClick={() => isHomepage && openModal("VIEW")}
+                disabled={!isHomepage}
+                className={`border p-2 text-xl rounded-md 
+                  ${
+                    isHomepage
+                      ? "hover:bg-primary hover:text-white text-blue-900 border-primary dark:border-secondary dark:text-white"
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
               >
                 <FaEye />
               </button>
             </div>
 
-            {/* UPLOAD FOLDER */}
-            {userLogin.roleId === 3 || userLogin.roleId === 1 ? (
+            {/* UPLOAD FILE */}
+            {userLogin.roleId === 1 && (
               <div className="toolItem">
                 <button
-                  onClick={() => openModal("FOLDER")}
-                  className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-yellow-800 dark:border-secondary dark:text-white"
+                  onClick={() => isHomepage && openModal("FILE")}
+                  disabled={!isHomepage}
+                  className={`border p-2 text-xl rounded-md 
+                    ${
+                      isHomepage
+                        ? "hover:bg-primary hover:text-white text-green-800 border-primary dark:border-secondary dark:text-white"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                >
+                  <FaFileUpload />
+                </button>
+              </div>
+            )}
+
+            {/* UPLOAD FOLDER */}
+            {userLogin.roleId === 1 && (
+              <div className="toolItem">
+                <button
+                  onClick={() => isHomepage && openModal("FOLDER")}
+                  disabled={!isHomepage}
+                  className={`border p-2 text-xl rounded-md 
+                    ${
+                      isHomepage
+                        ? "hover:bg-primary hover:text-white text-yellow-800 border-primary dark:border-secondary dark:text-white"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
                 >
                   <FaUpload />
                 </button>
               </div>
-            ) : (
-              ""
+            )}
+
+            {/* EDIT */}
+            {userLogin.roleId === 1 && (
+              <div className="toolItem">
+                <button
+                  onClick={() => openModal("EDIT")}
+                  className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-green-800 dark:border-secondary dark:text-white"
+                >
+                  <FaEdit />
+                </button>
+              </div>
+            )}
+
+            {/* DELETE */}
+            {userLogin.roleId === 1 && (
+              <div className="toolItem">
+                <button
+                  onClick={() => openModal("DELETE")}
+                  className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-red-800 dark:border-secondary dark:text-white"
+                >
+                  <FaTrash />
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Search + Filter */}
+          {/* Search */}
           <div className="search space-y-3 md:space-y-0 md:flex items-center gap-2">
             <Search
               onChange={handleOnChange}
@@ -62,8 +106,6 @@ export function Toolbar({ openModal, querySearch }) {
             />
           </div>
         </div>
-
-        {/* Filter Box */}
       </div>
     </>
   );

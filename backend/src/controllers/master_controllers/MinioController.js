@@ -24,86 +24,64 @@ const createBucket = async (req, res) => {
   }
 };
 // Mengupload file
+
 const uploadFile = async (req, res) => {
   const file = req.file;
   const formData = req.body;
+
   try {
     if (!file) {
       return api.error(res, "No file uploaded", 400);
     }
 
-    let minioFilePath = "";
-    let data = {};
+    // Pastikan semua string jadi uppercase
+    const noMr = formData.noMr ? formData.noMr.toUpperCase() : "";
+    const namaPasien = formData.namaPasien
+      ? formData.namaPasien.toUpperCase()
+      : "";
+    const jenisDokumen = formData.jenisDokumen
+      ? formData.jenisDokumen.toUpperCase()
+      : "";
+    const kategori = formData.kategori ? formData.kategori.toUpperCase() : "";
+    const layanan = formData.layanan ? formData.layanan.toUpperCase() : "";
+    const fileName = formData.fileName
+      ? formData.fileName.toUpperCase()
+      : file.originalname.toUpperCase();
 
-    // if (formData.document_id === "1") {
-    //   let documenName = "ACOUNT PAYABLE";
+    // Buat path file di Minio (misalnya: tanggalScan/noMR_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
+    const minioFilePath = `${moment(formData.tanggalScan).format(
+      "YYYYMMDD"
+    )}/${noMr}_${namaPasien}_${moment(formData.tglLahir).format(
+      "DDMMYYYY"
+    )}/${jenisDokumen}/${kategori}/${layanan}/${fileName}`;
 
-    //   minioFilePath =
-    //     documenName +
-    //     "/" +
-    //     formData.nobox +
-    //     "/" +
-    //     formData.namaBank +
-    //     "_" +
-    //     formData.noCek +
-    //     "_" +
-    //     formData.transaksiDate +
-    //     "_" +
-    //     formData.nilai +
-    //     "/" +
-    //     file.originalname;
+    // Data yang mau disimpan ke DB
+    const data = {
+      tanggalScan: formData.tanggalScan, // tetap format tanggal asli
+      noMr,
+      namaPasien,
+      tglLahir: formData.tglLahir, // tetap format tanggal asli
+      jenisDokumen,
+      kategori,
+      layanan,
+      fileName,
+      filePath: minioFilePath,
+    };
 
-    //   data = {
-    //     document_id: 1,
-    //     nobox: formData.nobox,
-    //     namaBank: formData.namaBank,
-    //     noCek: formData.noCek,
-    //     transaksiDate: formData.transaksiDate,
-    //     nilai: formData.nilai,
-    //     filename: file.originalname,
-    //     filePath: minioFilePath,
-    //   };
-    //   await modelMeta.insertPayable(data);
-    // } else {
-    //   let documenName = "ACOUNT RECEIVABLE";
+    // Upload file ke MinIO
+    const minioFile = {
+      fileName: minioFilePath,
+      fileBuffer: file.buffer,
+    };
 
-    //   minioFilePath =
-    //     documenName +
-    //     "/" +
-    //     formData.nobox +
-    //     "/" +
-    //     formData.noReceipt +
-    //     "_" +
-    //     formData.receiptDate +
-    //     "_" +
-    //     formData.customer +
-    //     "_" +
-    //     formData.nominal +
-    //     "/" +
-    //     file.originalname;
+    // console.log("➡️ File Path di MinIO:", minioFilePath);
 
-    //   data = {
-    //     document_id: 2,
-    //     nobox: formData.nobox,
-    //     noReceipt: formData.noReceipt,
-    //     receiptDate: formData.receiptDate,
-    //     customer: formData.customer,
-    //     nominal: formData.nominal,
-    //     filename: file.originalname,
-    //     filePath: minioFilePath,
-    //   };
-    //   await modelMeta.insertReceivable(data);
-    // }
+    await MinioModel.uploadFile(minioFile);
+    await modelMeta.insert(data);
 
-    // let minioFile = {
-    //   fileName: minioFilePath,
-    //   fileBuffer: file.buffer,
-    // };
-
-    // let result = MinioModel.uploadFile(minioFile);
-    // return api.success(res, result);
+    return api.success(res, { message: "File uploaded", data });
   } catch (err) {
-    // console.error("Error uploading file:", err);
+    console.error("Error uploading file:", err);
     return api.error(res, err, 500);
   }
 };
@@ -135,7 +113,6 @@ const uploadFolder = async (req, res) => {
       .map((file, index) => ({
         buffer: file.buffer,
         originalname: file.originalname,
-        // Normalisasi path biar konsisten di MinIO
         relativePath: (paths[index] || file.originalname).replace(/\\/g, "/"),
       }))
       .filter((file) => file.originalname.toLowerCase() !== "thumbs.db");
@@ -149,6 +126,7 @@ const uploadFolder = async (req, res) => {
 
     let successCount = 0;
     let failedCount = 0;
+    let skippedCount = 0;
 
     for (const [batchIndex, batch] of fileBatches.entries()) {
       console.log(
@@ -172,6 +150,16 @@ const uploadFolder = async (req, res) => {
               return;
             }
 
+            // 🔎 Cek dulu apakah metadata sudah ada di DB
+            const alreadyExists = await modelMeta.checkDatabase(
+              file.relativePath
+            );
+            if (alreadyExists) {
+              console.log(`⏭️ Skip file (sudah ada): ${file.relativePath}`);
+              skippedCount++;
+              return "skipped";
+            }
+
             // Simpan ke DB
             await insertDatabase(file.relativePath);
 
@@ -193,14 +181,16 @@ const uploadFolder = async (req, res) => {
         })
       );
 
-      successCount += results.filter((r) => r.status === "fulfilled").length;
+      successCount += results.filter((r) => r.value === true).length;
       failedCount += results.filter((r) => r.status === "rejected").length;
+      // skippedCount sudah ditambah di atas
     }
 
     return api.success(res, {
       message: "UPLOAD COMPLETED",
       total: files.length,
       success: successCount,
+      skipped: skippedCount,
       failed: failedCount,
     });
   } catch (error) {
@@ -228,24 +218,18 @@ const downloadFile = async (req, res) => {
 
 // Menghapus file dari MinIO
 const deleteFile = async (req, res) => {
-  const { filePath, accountName, dataId } = req.body;
-
-  if (!filePath) {
+  const { id, path } = req.query;
+  console.log(id, path);
+  if (!path) {
     return api.error(res, "File path is required", 400);
   }
 
   try {
-    const fileExist = await MinioModel.fileExist(filePath);
+    const fileExist = await MinioModel.fileExist(path);
     if (fileExist) {
-      // DELETE META DATA
-      if (accountName === "ACOUNT PAYABLE") {
-        modelMeta.delAP(dataId);
-      } else {
-        modelMeta.delAR(dataId);
-      }
-      // DELETE FILE DI MINIO
-      const data = await MinioModel.deleteFile(filePath);
-      return api.success(res, data);
+      await modelMeta.remove(id);
+      await MinioModel.deleteFile(path);
+      return api.success(res, "Deleted Successfully!");
     } else {
       return api.error(res, "File tidak ditemukan", 404);
     }

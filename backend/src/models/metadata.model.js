@@ -1,9 +1,43 @@
 const db = require("./../database/db.config");
 
 const getAll = async (querySearch) => {
-  let query = db.select("*").from("meta_data");
+  let query = db
+    .select(
+      "m.tanggalScan",
+      "m.noMr",
+      "m.namaPasien",
+      "m.tglLahir",
+      "m.jenisDokumen",
+      "m.kategori",
+      "m.layanan",
+      "m.title",
+      "m.filePath",
+      "m.doklin_code",
+      "m.created_date",
+      "m.created_date_string",
+      "d.name as doklin_name",
+      "d.id as doklin_id"
+    )
+    .from("meta_data as m")
+    .join("doklin as d", "d.code", "d.doklin_code");
   return await query;
 };
+
+const getAllByRequest = async () =>
+  await db
+    .select(
+      "m.noMr as norm",
+      "m.title",
+      "m.filePath as file_url",
+      "m.doklin_code",
+      "m.created_date",
+      "m.created_date_string",
+      "m.description",
+      "d.name as doklin_name",
+      "d.id as doklin_id"
+    )
+    .from("meta_data as m")
+    .join("doklin as d", "d.code", "d.doklin_code");
 
 const searchMetaData = async (querySearch) => {
   let query = db("meta_data").select("*");
@@ -39,4 +73,5 @@ module.exports = {
   searchMetaData,
   remove,
   update,
+  getAllByRequest,
 };

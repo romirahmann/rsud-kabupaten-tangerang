@@ -9,9 +9,11 @@ const uploadFolders = multer({ storage }).array("files");
 const authRoutes = require("../routes/utility_routes/auth.routes");
 const masterRoutes = require("../routes/master_routes/master.routes");
 const MinioController = require("../controllers/master_controllers/MinioController");
+const documentRoutes = require("../routes/master_routes/document.routes");
 
-router.use("/auth", authRoutes);
+router.use("/oauth", authRoutes);
 router.use("/master", masterRoutes);
+router.use("/document/v1/alih-media", documentRoutes);
 
 // Upload routes
 router.post("/upload-file", upload, MinioController.uploadFile);

@@ -93,8 +93,8 @@ const uploadFolder = async (req, res) => {
     }
 
     console.log("📂 Folder sedang di upload!");
-    console.log("req.files length:", req.files?.length);
-    console.log("req.body.paths (raw):", req.body.paths);
+    // console.log("req.files length:", req.files?.length);
+    // console.log("req.body.paths (raw):", req.body.paths);
 
     let paths;
     try {
@@ -129,21 +129,21 @@ const uploadFolder = async (req, res) => {
     let skippedCount = 0;
 
     for (const [batchIndex, batch] of fileBatches.entries()) {
-      console.log(
-        `🚀 Processing batch ${batchIndex + 1}/${fileBatches.length}, size: ${
-          batch.length
-        }`
-      );
+      // console.log(
+      //   `🚀 Processing batch ${batchIndex + 1}/${fileBatches.length}, size: ${
+      //     batch.length
+      //   }`
+      // );
 
       const results = await Promise.allSettled(
         batch.map(async (file) => {
           try {
-            console.log(
-              "➡️ Processing file:",
-              file.originalname,
-              "path:",
-              file.relativePath
-            );
+            // console.log(
+            //   "➡️ Processing file:",
+            //   file.originalname,
+            //   "path:",
+            //   file.relativePath
+            // );
 
             if (!file.relativePath) {
               console.warn("⚠️ File tanpa relativePath:", file.originalname);
@@ -155,7 +155,7 @@ const uploadFolder = async (req, res) => {
               file.relativePath
             );
             if (alreadyExists) {
-              console.log(`⏭️ Skip file (sudah ada): ${file.relativePath}`);
+              // console.log(`⏭️ Skip file (sudah ada): ${file.relativePath}`);
               skippedCount++;
               return "skipped";
             }
@@ -294,9 +294,9 @@ const insertDatabase = async (filepath) => {
   let namaPasien = partDataDiri[1];
   let tglLahir = moment(partDataDiri[2], "DDMMYYYY").format("YYYY-MM-DD");
   let jenisDokumen = parts[2];
-  let kategori = parts[3];
+  let doklin_code = parts[3];
   let layanan = parts[4];
-  let filename = parts[5];
+  let title = parts[5];
   let filePath = filepath;
 
   let data = {
@@ -305,9 +305,9 @@ const insertDatabase = async (filepath) => {
     namaPasien,
     tglLahir,
     jenisDokumen,
-    kategori,
+    doklin_code,
     layanan,
-    filename,
+    title,
     filePath,
   };
 

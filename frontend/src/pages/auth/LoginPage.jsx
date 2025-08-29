@@ -35,11 +35,29 @@ export function LoginPage() {
     }
 
     try {
-      let res = await api.post("/auth/login", formData);
-      let data = res.data.data;
-      let user = data.user;
-      let token = data.token;
+      let res = await api.post(
+        "http://192.168.9.192:3091/oauth/token?client_id=7F6E6D5T.ALIHMEDIA&client_secret=@BuanaAlihMedia1&grant_type=password",
+        formData
+      );
+      let loginInfo = res.data.data;
 
+      let user = {
+        fullname: loginInfo.fullname,
+        hospital_code: loginInfo.hospital_code,
+        hospital_name: loginInfo.hospital_name,
+        client_id: loginInfo.client_id,
+        roleId: loginInfo.roleId,
+        roleName: loginInfo.roleName,
+        default_timezone: loginInfo.default_timezone,
+        scope: loginInfo.scope,
+        jti: loginInfo.jti,
+        expires_in: loginInfo.expires_in,
+        timezone: loginInfo.timezone,
+        token_type: loginInfo.token_type,
+      };
+      let token = loginInfo.access_token;
+
+      // console.log(user, token);
       let saveSession = login(user, token);
 
       if (saveSession) {

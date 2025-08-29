@@ -64,7 +64,7 @@ export function Topbar({ userData }) {
             >
               <div className="detail-profil my-5">
                 <h1 className="text-md font-bold uppercase ">
-                  {userData?.username}
+                  {userData?.fullname}
                 </h1>
                 <h3 className="text-sm uppercase">{userData?.roleName}</h3>
               </div>

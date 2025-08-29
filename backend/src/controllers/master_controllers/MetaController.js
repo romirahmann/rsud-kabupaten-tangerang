@@ -8,6 +8,12 @@ const getAllMetaData = api.catchAsync(async (req, res) => {
   return api.success(res, result);
 });
 
+const getAllMetaDataByReq = api.catchAsync(async (req, res) => {
+  const { querySearch } = req.params || "";
+  let result = await model.getAllByRequest(querySearch);
+  return api.success(res, result);
+});
+
 const insertData = api.catchAsync(async (req, res) => {
   const data = req.body;
   let result = await model.insert(data);
@@ -32,4 +38,10 @@ const getSearchMeta = async (req, res) => {
   }
 };
 
-module.exports = { getAllMetaData, insertData, getSearchMeta, updateData };
+module.exports = {
+  getAllMetaData,
+  insertData,
+  getSearchMeta,
+  updateData,
+  getAllMetaDataByReq,
+};

@@ -17,13 +17,13 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: true,
-    service: "WEB SERVICE RSUD KABUPATEN TANGGERANG IS RUNNING!",
-  });
-});
+// app.get("/", (req, res) => {
+//   res.status(200).json({
+//     status: true,
+//     service: "WEB SERVICE RSUD KABUPATEN TANGGERANG IS RUNNING!",
+//   });
+// });
 
-app.use("/api", mainRoute);
+app.use("/", mainRoute);
 
 module.exports = { app, server };

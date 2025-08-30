@@ -3,15 +3,16 @@ const db = require("./../database/db.config");
 const getAll = async (querySearch) => {
   let query = db
     .select(
+      "m.id",
       "m.tanggalScan",
-      "m.noMr",
+      "m.noMr as norm",
       "m.namaPasien",
       "m.tglLahir",
       "m.jenisDokumen",
       "m.kategori",
       "m.layanan",
       "m.title",
-      "m.filePath",
+      "m.filePath as file_url",
       "m.doklin_code",
       "m.created_date",
       "m.created_date_string",
@@ -19,9 +20,12 @@ const getAll = async (querySearch) => {
       "d.id as doklin_id"
     )
     .from("meta_data as m")
-    .join("doklin as d", "d.code", "d.doklin_code");
+    .join("doklin as d", "d.code", "m.doklin_code");
   return await query;
 };
+
+const getByID = async (id) =>
+  await db.select("filePath").where("id", id).from("meta_data").first();
 
 const getAllByRequest = async () =>
   await db
@@ -37,7 +41,31 @@ const getAllByRequest = async () =>
       "d.id as doklin_id"
     )
     .from("meta_data as m")
-    .join("doklin as d", "d.code", "d.doklin_code");
+    .join("doklin as d", "d.code", "m.doklin_code");
+
+const getByNorm = async (norm) => {
+  let query = db
+    .select(
+      "m.noMr as norm",
+      "m.title",
+      "m.filePath as file_url",
+      "m.doklin_code",
+      "m.created_date",
+      "m.created_date_string",
+      "m.description",
+      "d.name as doklin_name",
+      "d.id as doklin_id"
+    )
+    .from("meta_data as m")
+    .join("doklin as d", "d.code", "m.doklin_code");
+
+  if (norm) {
+    query.where("m.noMr", "like", `%${norm}%`);
+  }
+
+  const result = await query;
+  return result;
+};
 
 const searchMetaData = async (querySearch) => {
   let query = db("meta_data").select("*");
@@ -57,7 +85,7 @@ const insert = async (data) => await db("meta_data").insert(data);
 const update = async (id, data) =>
   await db("meta_data").where("id", id).update(data);
 const remove = async (id) => await db("meta_data").where("id", id).delete();
-// 🔎 Tambahkan fungsi ini
+
 const checkDatabase = async (relativePath) => {
   const result = await db("meta_data")
     .where("filePath", relativePath)
@@ -74,4 +102,6 @@ module.exports = {
   remove,
   update,
   getAllByRequest,
+  getByNorm,
+  getByID,
 };

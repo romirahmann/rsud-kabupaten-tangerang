@@ -20,6 +20,8 @@ export function UploadFileForm({ onSubmit }) {
       ...prev,
       [name]: files ? files[0] : value,
     }));
+
+    console.log(files);
   };
 
   const handleSubmit = (e) => {

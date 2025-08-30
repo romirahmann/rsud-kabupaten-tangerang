@@ -86,6 +86,53 @@ const uploadFile = async (req, res) => {
   }
 };
 
+const uploadFileAPI = async (req, res) => {
+  const file = req.file;
+  const formData = req.body;
+  // console.log(file, formData);
+
+  try {
+    if (!file) {
+      return api.error(res, "No file uploaded", 400);
+    }
+
+    // Pastikan semua string jadi uppercase
+    const noMr = formData.noMr ? formData.noMr.toUpperCase() : "";
+    const doklin_code = formData.doklin_code
+      ? formData.doklin_code.toUpperCase()
+      : "";
+    const title = file.originalname;
+    const description = formData.description;
+
+    // Buat path file di Minio (misalnya: tanggalScan/noMR_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
+    const minioFilePath = `API/${noMr}/${doklin_code}/${title}`;
+
+    // Data yang mau disimpan ke DB
+    const data = {
+      noMr,
+      doklin_code,
+      title,
+      description,
+      filePath: minioFilePath,
+    };
+
+    // Upload file ke MinIO
+    const minioFile = {
+      fileName: minioFilePath,
+      fileBuffer: file.buffer,
+    };
+
+    // console.log("➡️ File Path di MinIO:", minioFilePath);
+    await modelMeta.insert(data);
+    await MinioModel.uploadFile(minioFile);
+
+    return api.success(res, { message: "File uploaded", data });
+  } catch (err) {
+    console.error("Error uploading file:", err);
+    return api.error(res, err, 500);
+  }
+};
+
 const uploadFolder = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -314,6 +361,30 @@ const insertDatabase = async (filepath) => {
   await modelMeta.insert(data);
 };
 
+const deleteFileAPI = async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (!id) {
+      return api.error(res, "ID Required!", 500);
+    }
+
+    let result = await modelMeta.getByID(id);
+    await modelMeta.remove(id);
+    await MinioModel.deleteFile(result.filePath);
+    return api.success(res, "Deleted Successfully!");
+  } catch (error) {
+    console.log(error);
+    return api.error(res, "Deleted Failed!", 500);
+  }
+};
+
+const updateFileAPI = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   uploadFile,
   uploadFolder,
@@ -322,4 +393,7 @@ module.exports = {
   checkFileExists,
   getFileUrl,
   createBucket,
+  uploadFileAPI,
+  deleteFileAPI,
+  updateFileAPI,
 };

@@ -12,6 +12,7 @@ import { UploadFolderForm } from "../../components/homepage/UploadFolderForm";
 import { UploadFileForm } from "../../components/modal/UploadFileForm";
 import { DeleteConfirmation } from "../../components/modal/DeleteConfirm";
 import { EditMetaDataForm } from "../../components/modal/EditMetaData";
+import { UploadFileAPI } from "../../components/modal/UploadFileAPI";
 
 export function HomePage() {
   const [modalOpen, setModalOpen] = useState({
@@ -21,7 +22,7 @@ export function HomePage() {
     showDelete: false,
   });
   const [documents, setDocuments] = useState({});
-
+  const [uploadFileAPI, setUploadFileAPI] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
@@ -34,7 +35,6 @@ export function HomePage() {
   const fetchDocument = async () => {
     try {
       let result = await api.get(`/master/documents`);
-
       setDocuments(result.data.data);
     } catch (error) {
       console.log(error);
@@ -43,8 +43,7 @@ export function HomePage() {
 
   const handleOnSearch = async (query) => {
     try {
-      let result = await api.get(`/master/document-search?search=${query}`);
-
+      let result = await api.get(`/document/v1/alih-media/norm/${query}`);
       setDocuments(result.data.data);
     } catch (error) {
       console.log(error.response.data);
@@ -218,7 +217,7 @@ export function HomePage() {
     // console.log(selectedDoc);
     try {
       await api.delete(
-        `/master/delete-file?id=${selectedDoc.id}&path=${selectedDoc.filePath}`
+        `/master/delete-file?id=${selectedDoc.id}&path=${selectedDoc.file_url}`
       );
       setModalOpen({ showDelete: false });
       setAlert({
@@ -271,6 +270,62 @@ export function HomePage() {
     }
   };
 
+  const handleTipeUploadFile = (e) => {
+    const { value } = e.target;
+
+    if (parseInt(value) === 1) {
+      setUploadFileAPI(true);
+    } else {
+      setUploadFileAPI(false);
+    }
+  };
+
+  const handleUploadFileAPI = async (data) => {
+    if (!data) {
+      setAlert({
+        show: true,
+        message: "Data Not Found!",
+        type: "warning",
+      });
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("doklin_code", data.doklin_code);
+      formData.append("noMr", data.noMr);
+      formData.append("file", data.file);
+
+      // // 🔎 cek isi formData sebelum upload
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(key, value);
+      // }
+
+      // kirim ke API
+      await api.post(`/document/v1/alih-media/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setModalOpen({ ...modalOpen, showUploadFile: false });
+      setAlert({
+        show: true,
+        message: "File uploaded successfully",
+        type: "success",
+      });
+
+      fetchDocument();
+    } catch (error) {
+      setAlert({
+        show: true,
+        message: "File upload failed",
+        type: "error",
+      });
+      console.log(error.response || error);
+    }
+  };
+
   const variants = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
@@ -318,7 +373,26 @@ export function HomePage() {
           title="Upload File"
           onClose={() => setModalOpen({ showUploadFile: false })}
         >
-          <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
+          <div className="mb-4">
+            <select
+              id="source"
+              name="source"
+              className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
+              defaultValue=""
+              onChange={handleTipeUploadFile}
+            >
+              <option value="" disabled>
+                -- Jenis Upload --
+              </option>
+              <option value="1">API</option>
+              <option value="2">PADAMA</option>
+            </select>
+          </div>
+          {uploadFileAPI ? (
+            <UploadFileAPI onSubmit={(data) => handleUploadFileAPI(data)} />
+          ) : (
+            <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
+          )}
         </Modal>
         <Modal
           isOpen={modalOpen.showUploadFolder}

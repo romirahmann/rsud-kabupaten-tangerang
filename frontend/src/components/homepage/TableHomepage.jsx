@@ -23,20 +23,41 @@ export function TableHomepage({ data = [], selectedData, filter = [] }) {
     {
       header: "Tanggal Scan",
       key: "tanggalScan",
-      render: (val) =>
-        val ? moment(val, "YYYYMMDD").format("DD MMM YYYY") : "-",
+      render: (val) => moment(val).format("DD MMM YYYY"),
     },
-    { header: "NO MR", key: "noMr" },
+
+    { header: "NORM", key: "norm" },
+    {
+      header: "Doklin Code",
+      key: "doklin_code",
+    },
+    { header: "Doklin Name", key: "doklin_name" },
     { header: "Nama Pasien", key: "namaPasien" },
     {
-      header: "Tanggal lahir",
+      header: "Tanggal Lahir",
       key: "tglLahir",
-      render: (val) => (val ? moment(val).format("DD MMM YYYY") : "-"),
+      render: (val) => moment(val).format("DD MMM YYYY"),
     },
-    { header: "Jenis Dokumen", key: "jenisDokumen" },
-    { header: "Kategori", key: "kategori" },
-    { header: "Layanan", key: "layanan" },
-    { header: "Filename", key: "filename" },
+    // {
+    //   header: "Jenis Dokumen",
+    //   key: "jenisDokumen",
+    // },
+    {
+      header: "Layanan",
+      key: "layanan",
+    },
+    {
+      header: "Title",
+      key: "title",
+    },
+
+    { header: "Description", key: "description" },
+    // {
+    //   header: "Created At",
+    //   key: "created_date_string",
+    //   render: (val) => moment(val).format("DD MMM YYYY"),
+    // },
+    { header: "File Url", key: "file_url" },
   ];
   return (
     <>

@@ -379,7 +379,15 @@ const deleteFileAPI = async (req, res) => {
 };
 
 const updateFileAPI = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
   try {
+    if (!id) {
+      return api.error(res, "ID Not Found!", 401);
+    }
+
+    let result = await modelMeta.update(id, data);
+    return api.success(res, result);
   } catch (error) {
     console.log(error);
   }

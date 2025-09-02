@@ -46,6 +46,7 @@ const getAllByRequest = async () =>
 const getByNorm = async (norm) => {
   let query = db
     .select(
+      "m.id",
       "m.noMr as norm",
       "m.title",
       "m.filePath as file_url",

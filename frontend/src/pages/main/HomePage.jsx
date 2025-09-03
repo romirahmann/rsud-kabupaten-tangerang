@@ -43,10 +43,14 @@ export function HomePage() {
 
   const handleOnSearch = async (query) => {
     try {
-      let result = await api.get(`/document/v1/alih-media/norm/${query}`);
-      setDocuments(result.data.data);
+      if (query && query.trim() !== "") {
+        let result = await api.get(`/document/v1/alih-media/norm/${query}`);
+        setDocuments(result.data.data);
+      } else {
+        fetchDocument(); // kalau query kosong, load semua
+      }
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error.response?.data || error);
     }
   };
 

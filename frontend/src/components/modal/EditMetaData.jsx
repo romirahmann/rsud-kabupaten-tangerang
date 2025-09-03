@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 export function EditMetaDataForm({ initialData = {}, onSubmit }) {
   const [form, setForm] = useState({
     tanggalScan: "",
-    noMr: "",
+    norm: "",
     namaPasien: "",
     tglLahir: "",
     jenisDokumen: "",
-    fileName: "",
-    kategori: "",
+    title: "",
+    doklin_code: "",
     layanan: "",
   });
 
@@ -19,12 +19,12 @@ export function EditMetaDataForm({ initialData = {}, onSubmit }) {
     if (initialData) {
       setForm({
         tanggalScan: moment(initialData.tanggalScan).format("YYYY-MM-DD") || "",
-        noMr: initialData.noMr || "",
+        norm: initialData.norm || "",
         namaPasien: initialData.namaPasien || "",
         tglLahir: moment(initialData.tglLahir).format("YYYY-MM-DD") || "",
         jenisDokumen: initialData.jenisDokumen || "",
-        fileName: initialData.filename || "",
-        kategori: initialData.kategori || "",
+        title: initialData.title || "",
+        doklin_code: initialData.doklin_code || "",
         layanan: initialData.layanan || "",
       });
     }
@@ -66,16 +66,16 @@ export function EditMetaDataForm({ initialData = {}, onSubmit }) {
       {/* No MR */}
       <div>
         <label
-          htmlFor="noMr"
+          htmlFor="norm"
           className="text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           No MR
         </label>
         <input
-          id="noMr"
+          id="norm"
           type="text"
-          name="noMr"
-          value={form.noMr}
+          name="norm"
+          value={form.norm}
           onChange={handleChange}
           className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
         />
@@ -138,34 +138,34 @@ export function EditMetaDataForm({ initialData = {}, onSubmit }) {
       {/* Nama File */}
       <div>
         <label
-          htmlFor="fileName"
+          htmlFor="title"
           className="text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Nama File
         </label>
         <input
-          id="fileName"
+          id="title"
           type="text"
-          name="fileName"
-          value={form.fileName}
+          name="title"
+          value={form.title}
           onChange={handleChange}
           className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
         />
       </div>
 
-      {/* Kategori */}
+      {/* doklin_code */}
       <div>
         <label
-          htmlFor="kategori"
+          htmlFor="doklin_code"
           className="text-sm font-medium text-gray-700 dark:text-gray-200"
         >
-          Kategori
+          Doklin_code
         </label>
         <input
-          id="kategori"
+          id="doklin_code"
           type="text"
-          name="kategori"
-          value={form.kategori}
+          name="doklin_code"
+          value={form.doklin_code}
           onChange={handleChange}
           className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
         />

@@ -57,7 +57,7 @@ export function HomePage() {
       case "VIEW":
         if (selectedDoc) {
           // console.log(selectedDoc);
-          getFilePDF(selectedDoc.filePath);
+          getFilePDF(selectedDoc.file_url);
           break;
         }
         setAlert({

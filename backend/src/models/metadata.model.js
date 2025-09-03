@@ -5,14 +5,14 @@ const getAll = async (querySearch) => {
     .select(
       "m.id",
       "m.tanggalScan",
-      "m.noMr as norm",
+      "m.norm",
       "m.namaPasien",
       "m.tglLahir",
       "m.jenisDokumen",
       "m.kategori",
       "m.layanan",
       "m.title",
-      "m.filePath as file_url",
+      "m.file_url",
       "m.doklin_code",
       "m.created_date",
       "m.created_date_string",
@@ -25,14 +25,14 @@ const getAll = async (querySearch) => {
 };
 
 const getByID = async (id) =>
-  await db.select("filePath").where("id", id).from("meta_data").first();
+  await db.select("file_url").where("id", id).from("meta_data").first();
 
 const getAllByRequest = async () =>
   await db
     .select(
-      "m.noMr as norm",
+      "m.norm",
       "m.title",
-      "m.filePath as file_url",
+      "m.file_url",
       "m.doklin_code",
       "m.created_date",
       "m.created_date_string",
@@ -47,9 +47,9 @@ const getByNorm = async (norm) => {
   let query = db
     .select(
       "m.id",
-      "m.noMr as norm",
+      "m.norm",
       "m.title",
-      "m.filePath as file_url",
+      "m.file_url",
       "m.doklin_code",
       "m.created_date",
       "m.created_date_string",
@@ -61,7 +61,7 @@ const getByNorm = async (norm) => {
     .join("doklin as d", "d.code", "m.doklin_code");
 
   if (norm) {
-    query.where("m.noMr", "like", `%${norm}%`);
+    query.where("m.norm", "like", `%${norm}%`);
   }
 
   const result = await query;
@@ -73,7 +73,7 @@ const searchMetaData = async (querySearch) => {
 
   if (querySearch) {
     query.whereRaw(
-      `MATCH(noMr, namaPasien, jenisDokumen, layanan, filename, kategori)
+      `MATCH(norm, namaPasien, jenisDokumen, layanan, filename, kategori)
        AGAINST(? IN BOOLEAN MODE)`,
       [`${querySearch}*`]
     );
@@ -89,7 +89,7 @@ const remove = async (id) => await db("meta_data").where("id", id).delete();
 
 const checkDatabase = async (relativePath) => {
   const result = await db("meta_data")
-    .where("filePath", relativePath)
+    .where("file_url", relativePath)
     .count({ count: "*" });
 
   return Number(result[0].count) > 0;

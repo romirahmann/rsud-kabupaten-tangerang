@@ -35,7 +35,7 @@ const uploadFile = async (req, res) => {
     }
 
     // Pastikan semua string jadi uppercase
-    const noMr = formData.noMr ? formData.noMr.toUpperCase() : "";
+    const norm = formData.norm ? formData.norm.toUpperCase() : "";
     const namaPasien = formData.namaPasien
       ? formData.namaPasien.toUpperCase()
       : "";
@@ -48,17 +48,17 @@ const uploadFile = async (req, res) => {
       ? formData.fileName.toUpperCase()
       : file.originalname.toUpperCase();
 
-    // Buat path file di Minio (misalnya: tanggalScan/noMR_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
+    // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
     const minioFilePath = `${moment(formData.tanggalScan).format(
       "YYYYMMDD"
-    )}/${noMr}_${namaPasien}_${moment(formData.tglLahir).format(
+    )}/${norm}_${namaPasien}_${moment(formData.tglLahir).format(
       "DDMMYYYY"
     )}/${jenisDokumen}/${kategori}/${layanan}/${fileName}`;
 
     // Data yang mau disimpan ke DB
     const data = {
       tanggalScan: formData.tanggalScan, // tetap format tanggal asli
-      noMr,
+      norm,
       namaPasien,
       tglLahir: formData.tglLahir, // tetap format tanggal asli
       jenisDokumen,
@@ -97,23 +97,23 @@ const uploadFileAPI = async (req, res) => {
     }
 
     // Pastikan semua string jadi uppercase
-    const noMr = formData.noMr ? formData.noMr.toUpperCase() : "";
+    const norm = formData.norm ? formData.norm.toUpperCase() : "";
     const doklin_code = formData.doklin_code
       ? formData.doklin_code.toUpperCase()
       : "";
     const title = file.originalname;
     const description = formData.description;
 
-    // Buat path file di Minio (misalnya: tanggalScan/noMR_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
-    const minioFilePath = `API/${noMr}/${doklin_code}/${title}`;
+    // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
+    const minioFilePath = `API/${norm}/${doklin_code}/${title}`;
 
     // Data yang mau disimpan ke DB
     const data = {
-      noMr,
+      norm,
       doklin_code,
       title,
       description,
-      filePath: minioFilePath,
+      file_url: minioFilePath,
     };
 
     // Upload file ke MinIO
@@ -140,8 +140,6 @@ const uploadFolder = async (req, res) => {
     }
 
     console.log("📂 Folder sedang di upload!");
-    // console.log("req.files length:", req.files?.length);
-    // console.log("req.body.paths (raw):", req.body.paths);
 
     let paths;
     try {
@@ -176,11 +174,11 @@ const uploadFolder = async (req, res) => {
     let skippedCount = 0;
 
     for (const [batchIndex, batch] of fileBatches.entries()) {
-      // console.log(
-      //   `🚀 Processing batch ${batchIndex + 1}/${fileBatches.length}, size: ${
-      //     batch.length
-      //   }`
-      // );
+      console.log(
+        `🚀 Processing batch ${batchIndex + 1}/${fileBatches.length}, size: ${
+          batch.length
+        }`
+      );
 
       const results = await Promise.allSettled(
         batch.map(async (file) => {
@@ -337,25 +335,25 @@ const insertDatabase = async (filepath) => {
   let partDataDiri = parts[1].split("_");
 
   let tanggalScan = moment(parts[0], "YYYYMMDD").format("YYYY-MM-DD");
-  let noMr = partDataDiri[0];
+  let norm = partDataDiri[0];
   let namaPasien = partDataDiri[1];
   let tglLahir = moment(partDataDiri[2], "DDMMYYYY").format("YYYY-MM-DD");
   let jenisDokumen = parts[2];
   let doklin_code = parts[3];
   let layanan = parts[4];
   let title = parts[5];
-  let filePath = filepath;
+  let file_url = filepath;
 
   let data = {
     tanggalScan,
-    noMr,
+    norm,
     namaPasien,
     tglLahir,
     jenisDokumen,
     doklin_code,
     layanan,
     title,
-    filePath,
+    file_url,
   };
 
   await modelMeta.insert(data);

@@ -73,7 +73,7 @@ const searchMetaData = async (querySearch) => {
 
   if (querySearch) {
     query.whereRaw(
-      `MATCH(norm, namaPasien, jenisDokumen, layanan, filename, kategori)
+      `MATCH(title, norm, namaPasien, doklin_code)
        AGAINST(? IN BOOLEAN MODE)`,
       [`${querySearch}*`]
     );

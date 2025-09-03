@@ -21,6 +21,6 @@ router.post("/create-bucket", MinioController.createBucket);
 // META
 router.get("/documents", MetaController.getAllMetaData);
 router.put("/document/:id", MetaController.updateData);
-router.get("/document-search", MetaController.getSearchMeta);
+router.get("/document-search/:querySearch", MetaController.getSearchMeta);
 
 module.exports = router;

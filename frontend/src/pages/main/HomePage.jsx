@@ -44,7 +44,8 @@ export function HomePage() {
   const handleOnSearch = async (query) => {
     try {
       if (query && query.trim() !== "") {
-        let result = await api.get(`/document/v1/alih-media/norm/${query}`);
+        let result = await api.get(`/master/document-search/${query}`);
+        // console.log(result.data.data);
         setDocuments(result.data.data);
       } else {
         fetchDocument(); // kalau query kosong, load semua
@@ -297,7 +298,7 @@ export function HomePage() {
     try {
       const formData = new FormData();
       formData.append("doklin_code", data.doklin_code);
-      formData.append("noMr", data.noMr);
+      formData.append("norm", data.norm);
       formData.append("file", data.file);
 
       // // 🔎 cek isi formData sebelum upload

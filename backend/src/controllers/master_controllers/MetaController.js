@@ -34,9 +34,9 @@ const updateData = api.catchAsync(async (req, res) => {
 
 const getSearchMeta = async (req, res) => {
   try {
-    const search = req.query.search || "";
+    const { querySearch } = req.params || "";
 
-    const data = await model.searchMetaData(search);
+    const data = await model.searchMetaData(querySearch);
 
     return api.success(res, data);
   } catch (err) {

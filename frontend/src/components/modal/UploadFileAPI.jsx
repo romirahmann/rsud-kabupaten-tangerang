@@ -5,7 +5,7 @@ import api from "../../services/axios.service";
 export function UploadFileAPI({ onSubmit }) {
   const [form, setForm] = useState({
     doklin_code: "",
-    noMr: "",
+    norm: "",
     title: "",
     file: null,
   });
@@ -65,17 +65,17 @@ export function UploadFileAPI({ onSubmit }) {
         {/* No MR */}
         <div>
           <label
-            htmlFor="noMr"
+            htmlFor="norm"
             className="text-sm font-medium text-gray-700 dark:text-gray-200"
           >
             NoRM
           </label>
           <input
-            id="noMr"
+            id="norm"
             type="text"
-            name="noMr"
-            placeholder="noMr"
-            value={form.noMr}
+            name="norm"
+            placeholder="norm"
+            value={form.norm}
             onChange={handleChange}
             className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
           />

@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const multer = require("multer");
 const storage = multer.memoryStorage();
+const path = require("path");
 
 const upload = multer({ storage }).single("file");
 const uploadFolders = multer({ storage }).array("files");

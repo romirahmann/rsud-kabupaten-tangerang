@@ -49,4 +49,5 @@ const routeTree = rootRoute.addChildren([
 
 export const router = createRouter({
   routeTree,
+  basepath: "/rsud-tangerang",
 });

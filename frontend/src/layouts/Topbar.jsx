@@ -34,7 +34,11 @@ export function Topbar({ userData }) {
       <div className="max-w-full bg-gray-700 dark:bg-gray-900 py-2 px-4 ">
         <div className="contentTopBar flex justify-between">
           <div className="brand flex gap-2 items-center">
-            <img src="/images/logo.png" className="w-[3em]" alt="" />
+            <img
+              src="/rsud-tangerang/images/logo.png"
+              className="w-[3em]"
+              alt=""
+            />
             <div>
               <h1 className="text-2xl font-bold text-[#FADA7A]">INTEKA</h1>
               <h3 className="text-sm text-[#F5F0CD]">

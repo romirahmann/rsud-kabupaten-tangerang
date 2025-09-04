@@ -89,7 +89,9 @@ export function LoginPage() {
     <>
       <div
         className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
-        style={{ backgroundImage: "url('/images/background.JPG')" }}
+        style={{
+          backgroundImage: "url('/rsud-tangerang/images/background.JPG')",
+        }}
       >
         {/* Overlay Blur + Darken */}
         <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-0"></div>
@@ -111,7 +113,7 @@ export function LoginPage() {
           <div className="flex flex-col justify-center bg-gray-100 p-10 ">
             <div className="title md:hidden flex flex-col items-center">
               <img
-                src="/icons/folder.png"
+                src="/rsud-tangerang/icons/folder.png"
                 className="w-[5em] text-center"
                 alt="Folder Icon"
               />

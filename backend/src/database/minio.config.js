@@ -1,8 +1,10 @@
+require("dotenv").config();
+
 module.exports = {
-  endPoint: "192.168.9.2",
-  port: 9000,
-  useSSL: false,
-  accessKey: "A2d4qFO18MI8UGFmhzw3",
-  secretKey: "SvFZ8ON2Db0Q1SfcKKJQc0S3art6vvNkrZs7JiR1",
-  bucketName: "rsud-kabupaten-tanggerang",
+  endPoint: process.env.endPoint,
+  port: parseInt(process.env.minioPort, 10), // string → int
+  useSSL: process.env.useSSL === "true", // string → boolean
+  accessKey: process.env.accessKey,
+  secretKey: process.env.secretKey,
+  bucketName: process.env.bucketName,
 };

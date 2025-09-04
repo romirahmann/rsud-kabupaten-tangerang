@@ -11,6 +11,24 @@ const minioClient = new Minio.Client({
 
 const bucketName = minioConfig.bucketName;
 
+// console.log({
+//   endPoint: minioConfig.endPoint,
+//   port: minioConfig.port,
+//   useSSL: minioConfig.useSSL,
+//   accessKey: minioConfig.accessKey,
+//   secretKey: minioConfig.secretKey,
+//   bucketName: bucketName,
+// });
+// const minioClient = new Minio.Client({
+//   endPoint: process.env.endPoint,
+//   port: process.env.minioPort,
+//   useSSL: process.env.useSSL === "false",
+//   accessKey: process.env.accessKey,
+//   secretKey: process.env.secretKey,
+// });
+
+// const bucketName = process.env.bucketName;
+
 const bucketExists = async (param) => await minioClient.bucketExists(param);
 const fileExist = async (filePath) =>
   await minioClient.statObject(bucketName, filePath);

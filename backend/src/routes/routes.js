@@ -3,7 +3,7 @@ var router = express.Router();
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const path = require("path");
-
+const { verifyToken, accessControl } = require("../services/auth.service");
 const upload = multer({ storage }).single("file");
 const uploadFolders = multer({ storage }).array("files");
 
@@ -14,7 +14,12 @@ const documentRoutes = require("../routes/master_routes/document.routes");
 
 router.use("/oauth", authRoutes);
 router.use("/master", masterRoutes);
-router.use("/document/v1/alih-media", documentRoutes);
+router.use(
+  "/document/v1/alih-media",
+  accessControl,
+  verifyToken,
+  documentRoutes
+);
 
 // Upload routes
 router.post("/upload-file", upload, MinioController.uploadFile);

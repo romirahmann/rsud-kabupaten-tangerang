@@ -36,7 +36,7 @@ export function LoginPage() {
 
     try {
       let res = await api.post(
-        "http://192.168.9.192:3091/oauth/token?client_id=7F6E6D5T.ALIHMEDIA&client_secret=@BuanaAlihMedia1&grant_type=password",
+        "/oauth/token?client_id=7F6E6D5T.ALIHMEDIA&client_secret=@BuanaAlihMedia1&grant_type=password",
         formData
       );
       let loginInfo = res.data.data;

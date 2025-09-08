@@ -2,23 +2,23 @@
 import { createContext } from "react";
 
 const hostname = window.location.hostname;
-let dynamicBaseAPI = "http://localhost:3091/";
-let dynamicBaseURL = "http://localhost:3091";
-// let dynamicBaseAPI = "";
-// let dynamicBaseURL = "";
+// let dynamicBaseAPI = "http://localhost:3091/";
+// let dynamicBaseURL = "http://localhost:3091";
+let dynamicBaseAPI = "";
+let dynamicBaseURL = "";
 
-// if (hostname.startsWith("192.168.9.")) {
-//   dynamicBaseAPI = "http://192.168.9.192:3091/";
-//   dynamicBaseURL = "http://192.168.9.192:3091";
-// } else if (hostname.startsWith("192.168.10.")) {
-//   dynamicBaseAPI = "http://192.168.10.192:3091/";
-//   dynamicBaseURL = "http://192.168.10.192:3091";
-// } else if (hostname === "localhost" || hostname === "127.0.0.1") {
-//   dynamicBaseAPI = "http://localhost:3091/";
-//   dynamicBaseURL = "http://localhost:3091";
-// } else {
-//   dynamicBaseAPI = "http://192.168.9.192:3091";
-// }
+if (hostname.startsWith("192.168.9.")) {
+  dynamicBaseAPI = "http://192.168.9.192:3091/";
+  dynamicBaseURL = "http://192.168.9.192:3091";
+} else if (hostname.startsWith("192.168.10.")) {
+  dynamicBaseAPI = "http://192.168.10.192:3091/";
+  dynamicBaseURL = "http://192.168.10.192:3091";
+} else if (hostname === "localhost" || hostname === "127.0.0.1") {
+  dynamicBaseAPI = "http://localhost:3091/";
+  dynamicBaseURL = "http://localhost:3091";
+} else {
+  dynamicBaseAPI = "http://192.168.9.192:3091";
+}
 
 export const ApiUrl = createContext(dynamicBaseAPI);
 export const UrlBaseBackend = createContext(dynamicBaseURL);

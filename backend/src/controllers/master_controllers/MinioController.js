@@ -368,7 +368,7 @@ const deleteFileAPI = async (req, res) => {
 
     let result = await modelMeta.getByID(id);
     await modelMeta.remove(id);
-    await MinioModel.deleteFile(result.filePath);
+    await MinioModel.deleteFile(result.file_url);
     return api.success(res, "Deleted Successfully!");
   } catch (error) {
     console.log(error);

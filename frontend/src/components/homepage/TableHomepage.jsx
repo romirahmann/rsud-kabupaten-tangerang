@@ -27,6 +27,7 @@ export function TableHomepage({ data = [], selectedData, filter = [] }) {
     },
 
     { header: "NORM", key: "norm" },
+    { header: "NO BOX", key: "noBox" },
     {
       header: "Doklin Code",
       key: "doklin_code",

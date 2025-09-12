@@ -5,6 +5,7 @@ import api from "../../services/axios.service";
 export function UploadFileForm({ onSubmit }) {
   const [form, setForm] = useState({
     tanggalScan: "",
+    noBox: "",
     norm: "",
     namaPasien: "",
     tglLahir: "",
@@ -84,6 +85,24 @@ export function UploadFileForm({ onSubmit }) {
         />
       </div>
 
+      <div>
+        <label
+          htmlFor="noBox"
+          className="text-sm font-medium text-gray-700 dark:text-gray-200"
+        >
+          No Box
+        </label>
+        <input
+          id="noBox"
+          type="text"
+          name="noBox"
+          placeholder="No Box"
+          value={form.noBox}
+          onChange={handleChange}
+          className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+
       {/* Nama Pasien */}
       <div>
         <label
@@ -122,7 +141,7 @@ export function UploadFileForm({ onSubmit }) {
       </div>
 
       {/* Jenis Dokumen */}
-      {/* <div>
+      <div>
         <label
           htmlFor="jenisDokumen"
           className="text-sm font-medium text-gray-700 dark:text-gray-200"
@@ -139,7 +158,7 @@ export function UploadFileForm({ onSubmit }) {
           readOnly
           className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white bg-gray-200 outline-none"
         />
-      </div> */}
+      </div>
 
       {/* Nama File */}
       {/* <div>

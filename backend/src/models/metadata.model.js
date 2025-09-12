@@ -6,6 +6,7 @@ const getAll = async (querySearch) => {
       "m.id",
       "m.tanggalScan",
       "m.norm",
+      "m.noBox",
       "m.namaPasien",
       "m.tglLahir",
       "m.jenisDokumen",

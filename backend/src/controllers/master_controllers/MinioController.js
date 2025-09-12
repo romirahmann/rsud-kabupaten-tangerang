@@ -33,9 +33,10 @@ const uploadFile = async (req, res) => {
     if (!file) {
       return api.error(res, "No file uploaded", 400);
     }
-
+    console.log(formData);
     // Pastikan semua string jadi uppercase
     const norm = formData.norm ? formData.norm.toUpperCase() : "";
+    const noBox = formData.noBox ? formData.noBox : "";
     const namaPasien = formData.namaPasien
       ? formData.namaPasien.toUpperCase()
       : "";
@@ -49,13 +50,14 @@ const uploadFile = async (req, res) => {
     // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
     const minioFilePath = `${moment(formData.tanggalScan).format(
       "YYYYMMDD"
-    )}/${norm}_${namaPasien}_${moment(formData.tglLahir).format(
+    )}/${noBox}/${norm}_${namaPasien}_${moment(formData.tglLahir).format(
       "DDMMYYYY"
     )}/${jenisDokumen}/${kategori}/${layanan}/${title}`;
 
     // Data yang mau disimpan ke DB
     const data = {
       tanggalScan: formData.tanggalScan, // tetap format tanggal asli
+      noBox,
       norm,
       namaPasien,
       tglLahir: formData.tglLahir, // tetap format tanggal asli
@@ -327,24 +329,26 @@ const insertDatabase = async (filepath) => {
   }
 
   const parts = filepath.split("/");
-
+  console.log(parts);
   if (parts.length < 6) {
     return false;
   }
-  let partDataDiri = parts[1].split("_");
+  let partDataDiri = parts[2].split("_");
 
   let tanggalScan = moment(parts[0], "YYYYMMDD").format("YYYY-MM-DD");
+  let nobox = parts[1];
   let norm = partDataDiri[0];
   let namaPasien = partDataDiri[1];
   let tglLahir = moment(partDataDiri[2], "DDMMYYYY").format("YYYY-MM-DD");
-  let jenisDokumen = parts[2];
-  let doklin_code = parts[3];
-  let layanan = parts[4];
-  let title = parts[5];
+  let jenisDokumen = parts[3];
+  let doklin_code = parts[4];
+  let layanan = parts[5];
+  let title = parts[6];
   let file_url = filepath;
 
   let data = {
     tanggalScan,
+    nobox,
     norm,
     namaPasien,
     tglLahir,

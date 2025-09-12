@@ -179,7 +179,8 @@ export function HomePage() {
     try {
       const formData = new FormData();
       formData.append("tanggalScan", data.tanggalScan);
-      formData.append("norm", data.noMr);
+      formData.append("noBox", data.noBox);
+      formData.append("norm", data.norm);
       formData.append("namaPasien", data.namaPasien); // ✅ tambahin di sini
       formData.append("tglLahir", data.tglLahir);
       formData.append("jenisDokumen", data.jenisDokumen);

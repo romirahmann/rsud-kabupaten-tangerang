@@ -40,7 +40,7 @@ export function UploadFileAPI({ onSubmit }) {
   return (
     <>
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-        {/* No MR */}
+        {/* Doklin Code */}
         <div>
           <label
             htmlFor="doklin_code"

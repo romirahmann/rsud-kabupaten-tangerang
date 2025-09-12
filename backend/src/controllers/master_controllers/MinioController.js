@@ -44,16 +44,14 @@ const uploadFile = async (req, res) => {
       : "";
     const kategori = formData.kategori ? formData.kategori.toUpperCase() : "";
     const layanan = formData.layanan ? formData.layanan.toUpperCase() : "";
-    const fileName = formData.fileName
-      ? formData.fileName.toUpperCase()
-      : file.originalname.toUpperCase();
+    const title = file.originalname.toUpperCase();
 
     // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
     const minioFilePath = `${moment(formData.tanggalScan).format(
       "YYYYMMDD"
     )}/${norm}_${namaPasien}_${moment(formData.tglLahir).format(
       "DDMMYYYY"
-    )}/${jenisDokumen}/${kategori}/${layanan}/${fileName}`;
+    )}/${jenisDokumen}/${kategori}/${layanan}/${title}`;
 
     // Data yang mau disimpan ke DB
     const data = {
@@ -63,9 +61,10 @@ const uploadFile = async (req, res) => {
       tglLahir: formData.tglLahir, // tetap format tanggal asli
       jenisDokumen,
       kategori,
+      doklin_code: kategori,
       layanan,
-      fileName,
-      filePath: minioFilePath,
+      title,
+      file_url: minioFilePath,
     };
 
     // Upload file ke MinIO

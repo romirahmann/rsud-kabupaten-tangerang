@@ -50,8 +50,6 @@ const login = api.catchAsync(async (req, res) => {
     hospital_name: user[0].hospital_name,
   };
 
-  console.log(userData);
-
   // Generate token
   const access_token = generateToken({ ...userData, client_id, scope });
   const refresh_token = generateRefreshToken({ ...userData, client_id, scope });

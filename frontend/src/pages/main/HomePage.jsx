@@ -179,11 +179,10 @@ export function HomePage() {
     try {
       const formData = new FormData();
       formData.append("tanggalScan", data.tanggalScan);
-      formData.append("noMr", data.noMr);
+      formData.append("norm", data.noMr);
       formData.append("namaPasien", data.namaPasien); // ✅ tambahin di sini
       formData.append("tglLahir", data.tglLahir);
       formData.append("jenisDokumen", data.jenisDokumen);
-      formData.append("fileName", data.fileName);
       formData.append("kategori", data.kategori);
       formData.append("layanan", data.layanan);
       formData.append("file", data.file);

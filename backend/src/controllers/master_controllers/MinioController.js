@@ -334,6 +334,7 @@ const insertDatabase = async (filepath) => {
     return false;
   }
   let partDataDiri = parts[2].split("_");
+  let fullFileName = parts[6].split("_");
 
   let tanggalScan = moment(parts[0], "YYYYMMDD").format("YYYY-MM-DD");
   let nobox = parts[1];
@@ -343,7 +344,8 @@ const insertDatabase = async (filepath) => {
   let jenisDokumen = parts[3];
   let doklin_code = parts[4];
   let layanan = parts[5];
-  let title = parts[6];
+  let tanggalKunjungan = fullFileName[0];
+  let title = fullFileName[1];
   let file_url = filepath;
 
   let data = {
@@ -355,6 +357,7 @@ const insertDatabase = async (filepath) => {
     jenisDokumen,
     doklin_code,
     layanan,
+    tanggalKunjungan,
     title,
     file_url,
   };

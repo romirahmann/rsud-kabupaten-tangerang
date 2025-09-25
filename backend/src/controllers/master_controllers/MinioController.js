@@ -33,7 +33,7 @@ const uploadFile = async (req, res) => {
     if (!file) {
       return api.error(res, "No file uploaded", 400);
     }
-    console.log(formData);
+    // console.log(formData);
     // Pastikan semua string jadi uppercase
     const norm = formData.norm ? formData.norm.toUpperCase() : "";
     const noBox = formData.noBox ? formData.noBox : "";
@@ -47,12 +47,24 @@ const uploadFile = async (req, res) => {
     const layanan = formData.layanan ? formData.layanan.toUpperCase() : "";
     const title = file.originalname.toUpperCase();
 
+    let layananFilePath;
+
+    if (formData.layanan === "IGD") {
+      layananFilePath = "IGD";
+    }
+    if (formData.layanan === "IRJ") {
+      layananFilePath = "RAJAL";
+    }
+    if (formData.layanan === "IRNA") {
+      layananFilePath = "RANAP";
+    }
+
     // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
     const minioFilePath = `${moment(formData.tanggalScan).format(
       "YYYYMMDD"
     )}/${noBox}/${norm}_${namaPasien}_${moment(formData.tglLahir).format(
       "DDMMYYYY"
-    )}/${jenisDokumen}/${kategori}/${layanan}/${title}`;
+    )}/${jenisDokumen}/${kategori}/${layananFilePath}/${title}`;
 
     // Data yang mau disimpan ke DB
     const data = {
@@ -104,9 +116,10 @@ const uploadFileAPI = async (req, res) => {
       : "";
     const title = file.originalname;
     const description = formData.description;
+    const service_type = formData.service_type;
 
     // Buat path file di Minio (misalnya: tanggalScan/norm_namaPasien_tglLahir/jenisDokumen/kategori/layanan/fileName)
-    const minioFilePath = `API/${norm}/${doklin_code}/${title}`;
+    const minioFilePath = `API/${norm}/${doklin_code}/${service_type}/${title}`;
 
     // Data yang mau disimpan ke DB
     const data = {
@@ -114,6 +127,7 @@ const uploadFileAPI = async (req, res) => {
       doklin_code,
       title,
       description,
+      layanan: service_type,
       file_url: minioFilePath,
     };
 
@@ -163,34 +177,18 @@ const uploadFolder = async (req, res) => {
       }))
       .filter((file) => file.originalname.toLowerCase() !== "thumbs.db");
 
-    console.log("files after map/filter:", files.length);
-
     const batchSize = 50;
     const fileBatches = chunkArray(files, batchSize);
-
-    console.log("fileBatches count:", fileBatches.length);
 
     let successCount = 0;
     let failedCount = 0;
     let skippedCount = 0;
+    let failedFiles = []; // ⬅️ simpan daftar file gagal
 
     for (const [batchIndex, batch] of fileBatches.entries()) {
-      console.log(
-        `🚀 Processing batch ${batchIndex + 1}/${fileBatches.length}, size: ${
-          batch.length
-        }`
-      );
-
       const results = await Promise.allSettled(
         batch.map(async (file) => {
           try {
-            // console.log(
-            //   "➡️ Processing file:",
-            //   file.originalname,
-            //   "path:",
-            //   file.relativePath
-            // );
-
             if (!file.relativePath) {
               console.warn("⚠️ File tanpa relativePath:", file.originalname);
               return;
@@ -201,7 +199,7 @@ const uploadFolder = async (req, res) => {
               file.relativePath
             );
             if (alreadyExists) {
-              // console.log(`⏭️ Skip file (sudah ada): ${file.relativePath}`);
+              console.log(`⏭️ Skip file (sudah ada): ${file.relativePath}`);
               skippedCount++;
               return "skipped";
             }
@@ -218,10 +216,13 @@ const uploadFolder = async (req, res) => {
             return true;
           } catch (error) {
             console.error(
-              "❌ Error saat proses file:",
-              file.originalname,
-              error
+              `❌ Gagal upload file: ${file.relativePath}`,
+              error.message || error
             );
+            failedFiles.push({
+              file: file.relativePath,
+              error: error.message || error,
+            });
             throw error;
           }
         })
@@ -229,7 +230,6 @@ const uploadFolder = async (req, res) => {
 
       successCount += results.filter((r) => r.value === true).length;
       failedCount += results.filter((r) => r.status === "rejected").length;
-      // skippedCount sudah ditambah di atas
     }
 
     return api.success(res, {
@@ -238,6 +238,7 @@ const uploadFolder = async (req, res) => {
       success: successCount,
       skipped: skippedCount,
       failed: failedCount,
+      failedFiles, // ⬅️ tampilkan daftar file gagal
     });
   } catch (error) {
     console.error("❌ Terjadi kesalahan dalam uploadFolder:", error);
@@ -324,45 +325,60 @@ const getFileUrl = async (req, res) => {
 };
 
 const insertDatabase = async (filepath) => {
-  if (!filepath) {
-    return false;
+  try {
+    if (!filepath) {
+      return false;
+    }
+
+    const parts = filepath.split("/");
+
+    if (parts.length < 6) {
+      return false;
+    }
+    let partDataDiri = parts[2].split("_");
+    let fullFileName = parts[6].split("_");
+
+    let tanggalScan = moment(parts[0], "YYYYMMDD").format("YYYY-MM-DD");
+    let nobox = parts[1];
+    let norm = partDataDiri[0];
+    let namaPasien = partDataDiri[1];
+    let tglLahir = moment(partDataDiri[2], "DDMMYYYY").format("YYYY-MM-DD");
+    let jenisDokumen = parts[3];
+    let doklin_code = parts[4];
+    let layanan;
+    let tanggalKunjungan = fullFileName[0];
+    let title = fullFileName[1];
+    let file_url = filepath;
+
+    if (parts[5] === "RANAP") {
+      layanan = "IRNA";
+    }
+    if (parts[5] === "RAJAL") {
+      layanan = "IRJ";
+    }
+    if (parts[5] === "IGD") {
+      layanan = "IGD";
+    }
+
+    let data = {
+      tanggalScan,
+      nobox,
+      norm,
+      namaPasien,
+      tglLahir,
+      jenisDokumen,
+      doklin_code,
+      layanan,
+      tanggalKunjungan,
+      title,
+      file_url,
+    };
+
+    await modelMeta.insert(data);
+  } catch (error) {
+    console.log(error);
+    return api.error(res, error, 500);
   }
-
-  const parts = filepath.split("/");
-  console.log(parts);
-  if (parts.length < 6) {
-    return false;
-  }
-  let partDataDiri = parts[2].split("_");
-  let fullFileName = parts[6].split("_");
-
-  let tanggalScan = moment(parts[0], "YYYYMMDD").format("YYYY-MM-DD");
-  let nobox = parts[1];
-  let norm = partDataDiri[0];
-  let namaPasien = partDataDiri[1];
-  let tglLahir = moment(partDataDiri[2], "DDMMYYYY").format("YYYY-MM-DD");
-  let jenisDokumen = parts[3];
-  let doklin_code = parts[4];
-  let layanan = parts[5];
-  let tanggalKunjungan = fullFileName[0];
-  let title = fullFileName[1];
-  let file_url = filepath;
-
-  let data = {
-    tanggalScan,
-    nobox,
-    norm,
-    namaPasien,
-    tglLahir,
-    jenisDokumen,
-    doklin_code,
-    layanan,
-    tanggalKunjungan,
-    title,
-    file_url,
-  };
-
-  await modelMeta.insert(data);
 };
 
 const deleteFileAPI = async (req, res) => {

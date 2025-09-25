@@ -1,38 +1,41 @@
-/* eslint-disable no-unused-vars */
-import { useState } from "react";
+// 💡 DIUBAH: Komponen ini sekarang jauh lebih sederhana.
+// Tidak ada lagi state internal atau tombol submit.
+// Upload akan dipicu langsung dari event `onChange`.
 
-export function UploadFolderForm({ onUpload }) {
-  const [selectedFiles, setSelectedFiles] = useState(null);
-  const handleChange = (e) => {
-    setSelectedFiles(e.target.files);
-  };
-  const handleSubmit = () => {
-    onUpload(selectedFiles);
+export function UploadFolderForm({ onFolderSelect }) {
+  const handleFileChange = (e) => {
+    // Langsung panggil fungsi dari parent saat folder dipilih
+    if (e.target.files && e.target.files.length > 0) {
+      onFolderSelect(e.target.files);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm text-gray-700 dark:text-white">
-        Choose your folder!
+      <label
+        htmlFor="folder-upload"
+        className="block text-sm font-medium text-gray-700 dark:text-white"
+      >
+        Pilih folder untuk di-upload
       </label>
+      <p className="text-xs text-gray-500">
+        Proses upload akan dimulai secara otomatis setelah Anda memilih folder
+        dan menekan "Upload" pada dialog browser.
+      </p>
       <input
+        id="folder-upload"
         type="file"
         webkitdirectory="true"
         directory=""
         multiple
-        onChange={handleChange}
-        className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
+        onChange={handleFileChange}
+        className="block w-full text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700
+          hover:file:bg-blue-100"
       />
-
-      <div className="ms-1">
-        <button
-          onClick={() => handleSubmit()}
-          type="submit"
-          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-80"
-        >
-          Upload
-        </button>
-      </div>
     </div>
   );
 }

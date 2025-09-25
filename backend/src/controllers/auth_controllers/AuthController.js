@@ -28,8 +28,15 @@ const login = api.catchAsync(async (req, res) => {
   }
 
   // Cari user dari DB
-  const user = await userModel.login(username);
-  if (!user) {
+  let user;
+  try {
+    user = await userModel.login(username);
+  } catch (err) {
+    console.error("DB Error:", err);
+    return api.error(res, "Database error", 500);
+  }
+
+  if (!user || user.length === 0) {
     return api.error(res, "User Not Found!", 401);
   }
 
@@ -64,7 +71,7 @@ const login = api.catchAsync(async (req, res) => {
     expires_in,
     scope,
     default_timezone: "Asia/Jakarta",
-    user_id: userData.user_id,
+    user_id: userData.userId,
     timezone: null,
     hospital_code: userData.hospital_code,
     fullname: userData.fullname,

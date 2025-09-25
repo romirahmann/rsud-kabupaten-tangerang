@@ -64,7 +64,7 @@ const verifyPassword = async (plainPassword, hashPassword) => {
   }
 };
 
-const hashPasword = async (plainPassword) => {
+const hashPassword = async (plainPassword) => {
   try {
     return await argon2.hash(plainPassword, {
       type: argon2.argon2id,
@@ -84,6 +84,6 @@ module.exports = {
   verifyToken, // ✅ sudah balik ada
   accessControl,
   verifyPassword,
-  hashPasword,
+  hashPassword,
   verifyClient,
 };

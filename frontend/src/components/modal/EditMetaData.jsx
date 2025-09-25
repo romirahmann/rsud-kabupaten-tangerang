@@ -171,22 +171,30 @@ export function EditMetaDataForm({ initialData = {}, onSubmit }) {
         />
       </div>
 
-      {/* Layanan */}
+      {/* Service Type */}
       <div>
         <label
           htmlFor="layanan"
           className="text-sm font-medium text-gray-700 dark:text-gray-200"
         >
-          Layanan
+          Jenis Layanan
         </label>
-        <input
-          id="layanan"
-          type="text"
+        <select
           name="layanan"
+          placeholder="layanan"
+          id="layanan"
           value={form.layanan}
           onChange={handleChange}
           className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
-        />
+        >
+          <option value={""} disabled>
+            {" "}
+            -- Selected --{" "}
+          </option>
+          <option value={"IGD"}> IGD </option>
+          <option value={"IRJ"}> IRJ </option>
+          <option value={"IRNA"}> IRNA </option>
+        </select>
       </div>
 
       {/* Tombol Submit */}

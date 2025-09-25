@@ -14,9 +14,8 @@ const login = async (username) =>
     )
     .from("users as u")
     .join("userrole as r", "r.roleId", "u.roleId")
-    .innerJoin("hospitals as h", "h.hospital_code", "u.hospital_code")
-    .where("username", username);
-
+    .leftJoin("hospitals as h", "h.hospital_code", "u.hospital_code") // ✅ ubah ke LEFT JOIN
+    .where("u.username", username);
 module.exports = {
   login,
 };

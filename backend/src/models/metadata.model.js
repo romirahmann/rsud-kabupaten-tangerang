@@ -55,6 +55,7 @@ const getByNorm = async (norm) => {
       "m.created_date",
       "m.created_date_string",
       "m.description",
+      "m.layanan as service_type",
       "d.name as doklin_name",
       "d.id as doklin_id"
     )

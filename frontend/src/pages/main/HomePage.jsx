@@ -13,6 +13,17 @@ import { UploadFileForm } from "../../components/modal/UploadFileForm";
 import { DeleteConfirmation } from "../../components/modal/DeleteConfirm";
 import { EditMetaDataForm } from "../../components/modal/EditMetaData";
 import { UploadFileAPI } from "../../components/modal/UploadFileAPI";
+import { PulsatingDotsSpinner } from "../../shared/Spinner";
+
+// ✅ Tambahkan komponen Progress Overlay
+const UploadProgressOverlay = ({ processed, total }) => (
+  <div className="fixed inset-0 z-[99] flex flex-col items-center justify-center bg-gray-900 bg-opacity-60 backdrop-blur-sm">
+    <PulsatingDotsSpinner />
+    <p className="mt-4 text-white font-semibold">
+      Mengupload {processed} dari {total} file...
+    </p>
+  </div>
+);
 
 export function HomePage() {
   const [modalOpen, setModalOpen] = useState({
@@ -26,6 +37,13 @@ export function HomePage() {
   const [alert, setAlert] = useState({ show: false, type: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  // ✅ State baru untuk melacak progres upload
+  const [uploadProgress, setUploadProgress] = useState({
+    show: false,
+    processed: 0,
+    total: 0,
+  });
 
   useEffect(() => {
     fetchDocument();
@@ -117,52 +135,127 @@ export function HomePage() {
   };
 
   // Handle Upload Folder
-  const handleUploadFolder = async (selectedFolder) => {
-    if (!selectedFolder || selectedFolder.length === 0) {
+  // const handleUploadFolder = async (selectedFolder) => {
+  //   if (!selectedFolder || selectedFolder.length === 0) {
+  //     setAlert({
+  //       show: true,
+  //       message: "Please select  folder to proceed",
+  //       type: "warning",
+  //     });
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+  //   const paths = [];
+
+  //   for (let file of selectedFolder) {
+  //     const relativePath = file.webkitRelativePath;
+  //     if (!relativePath) {
+  //       setAlert({
+  //         show: true,
+  //         message: "Path InValid!",
+  //         type: "error",
+  //       });
+  //       return;
+  //     }
+  //     formData.append("files", file);
+  //     paths.push(relativePath);
+  //   }
+
+  //   formData.append("paths", JSON.stringify(paths));
+
+  //   try {
+  //     await api.post(`/upload-folder`, formData);
+  //     setModalOpen({ ...modalOpen, showUploadFolder: false });
+  //     setAlert({
+  //       show: true,
+  //       message: "Folder uploaded successfully",
+  //       type: "success",
+  //     });
+  //     fetchDocument();
+  //     setUploading(true);
+  //   } catch (error) {
+  //     setAlert({
+  //       show: true,
+  //       message: "Folder uploaded failed",
+  //       type: "error",
+  //     });
+  //     console.log(error.response);
+  //   }
+  // };
+
+  // ✅ FUNGSI UTAMA: Logika upload folder dengan sistem batch
+  const handleUploadFolder = async (fileList) => {
+    setModalOpen({ showUploadFolder: false }); // Langsung tutup modal
+
+    if (!fileList || fileList.length === 0) {
       setAlert({
         show: true,
-        message: "Please select  folder to proceed",
+        message: "Tidak ada folder yang dipilih.",
         type: "warning",
       });
       return;
     }
 
-    const formData = new FormData();
-    const paths = [];
+    const files = Array.from(fileList);
+    const BATCH_SIZE = 50; // Kirim 50 file per permintaan
+    const totalFiles = files.length;
 
-    for (let file of selectedFolder) {
-      const relativePath = file.webkitRelativePath;
-      if (!relativePath) {
-        setAlert({
-          show: true,
-          message: "Path InValid!",
-          type: "error",
-        });
-        return;
-      }
-      formData.append("files", file);
-      paths.push(relativePath);
-    }
-
-    formData.append("paths", JSON.stringify(paths));
+    setUploadProgress({ show: true, processed: 0, total: totalFiles });
 
     try {
-      await api.post(`/upload-folder`, formData);
-      setModalOpen({ ...modalOpen, showUploadFolder: false });
+      // 💡 Proses upload dibagi per batch
+      for (let i = 0; i < totalFiles; i += BATCH_SIZE) {
+        const batch = files.slice(i, i + BATCH_SIZE);
+        await uploadBatch(batch);
+
+        // Update progress setelah setiap batch berhasil
+        setUploadProgress((prev) => ({
+          ...prev,
+          processed: Math.min(prev.processed + BATCH_SIZE, totalFiles),
+        }));
+      }
+
       setAlert({
         show: true,
-        message: "Folder uploaded successfully",
+        message: "Semua file dalam folder berhasil di-upload!",
         type: "success",
       });
       fetchDocument();
     } catch (error) {
+      console.error("Upload batch gagal:", error);
       setAlert({
         show: true,
-        message: "Folder uploaded failed",
+        message: `Terjadi kesalahan saat meng-upload. Coba lagi. (Error: ${error.message})`,
         type: "error",
       });
-      console.log(error.response);
+    } finally {
+      // Sembunyikan overlay loading setelah selesai (baik sukses maupun gagal)
+      setUploadProgress({ show: false, processed: 0, total: 0 });
     }
+  };
+
+  // Fungsi helper untuk meng-upload satu batch
+  const uploadBatch = async (fileBatch) => {
+    const formData = new FormData();
+    const paths = [];
+
+    for (const file of fileBatch) {
+      // Pastikan webkitRelativePath ada untuk validasi
+      if (!file.webkitRelativePath) {
+        throw new Error(
+          "Path file tidak valid. Pastikan Anda menggunakan browser berbasis Chromium."
+        );
+      }
+      formData.append("files", file);
+      paths.push(file.webkitRelativePath);
+    }
+    formData.append("paths", JSON.stringify(paths));
+
+    // Kirim batch ke server
+    await api.post(`/upload-folder`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   };
 
   // Handle Upload File
@@ -339,6 +432,13 @@ export function HomePage() {
 
   return (
     <>
+      {/* ✅ Tampilkan Progress Overlay secara global */}
+      {uploadProgress.show && (
+        <UploadProgressOverlay
+          processed={uploadProgress.processed}
+          total={uploadProgress.total}
+        />
+      )}
       <div className="max-w-full">
         <Toolbar
           openModal={handleOpenModal}
@@ -378,7 +478,8 @@ export function HomePage() {
           title="Upload File"
           onClose={() => setModalOpen({ showUploadFile: false })}
         >
-          <div className="mb-4">
+          <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
+          {/* <div className="mb-4">
             <select
               id="source"
               name="source"
@@ -397,14 +498,19 @@ export function HomePage() {
             <UploadFileAPI onSubmit={(data) => handleUploadFileAPI(data)} />
           ) : (
             <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
-          )}
+          )} */}
         </Modal>
+        {/* upload folder */}
         <Modal
           isOpen={modalOpen.showUploadFolder}
           title="Upload Folder"
           onClose={() => setModalOpen({ showUploadFolder: false })}
         >
-          <UploadFolderForm onUpload={(files) => handleUploadFolder(files)} />
+          {/* <UploadFolderForm
+            onUpload={(files) => handleUploadFolder(files)}
+            submitted={uploading}
+          /> */}
+          <UploadFolderForm onFolderSelect={handleUploadFolder} />
         </Modal>
         <Modal
           isOpen={modalOpen.showEdit}
@@ -420,6 +526,8 @@ export function HomePage() {
         >
           <DeleteConfirmation onDelete={() => handleDeleted()} />
         </Modal>
+        {/* MODAL UPLOAD LOADING */}
+        <Modal></Modal>
         {/* ALERTS */}
         {alert.show && (
           <AlertMessage

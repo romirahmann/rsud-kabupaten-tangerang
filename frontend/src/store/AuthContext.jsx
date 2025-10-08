@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
     try {
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData); // ✅ tambahkan ini
+      setUser(userData);
       return true;
     } catch (error) {
       return false;

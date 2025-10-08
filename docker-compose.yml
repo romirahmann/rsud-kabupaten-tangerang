@@ -1,0 +1,69 @@
+version: "3.9"
+
+networks:
+  global_network:
+    external: true
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_inteka_container
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3091:3091"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./backend/env/.env-production
+    networks:
+      - global_network
+    # depends_on:
+    #   - mysql
+    #   - minio
+
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: mysql_inteka_container
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 121711
+  #     MYSQL_DATABASE: rsud_kab_tangerang
+  #   ports:
+  #     - "3307:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   networks:
+  #     - global_network
+
+  # minio:
+  #   image: minio/minio
+  #   container_name: minio_inteka_container
+  #   command: server /data --console-address ":9001"
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   env_file:
+  #     - ./backend/env/.env-production
+  #   volumes:
+  #     - minio_data:/data
+  #   networks:
+  #     - global_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_inteka_container
+    ports:
+      - "82:82"
+    depends_on:
+      - backend
+    networks:
+      - global_network
+# volumes:
+#   mysql_data:
+#   minio_data:

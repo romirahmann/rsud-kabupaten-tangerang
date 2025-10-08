@@ -5,12 +5,13 @@ import { MdOutlineDarkMode, MdOutlineWbSunny } from "react-icons/md";
 import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
 import { useAuth } from "../store/AuthContext";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 export function Topbar({ userData }) {
   const [profilIsOpen, setProfilIsOpen] = useState(false);
   const { theme, toggleTheme } = useDarkMode();
   const useRefProfil = useRef(null);
   const { logout } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -28,6 +29,7 @@ export function Topbar({ userData }) {
   }, []);
   const handleLogout = () => {
     logout();
+    router.navigate({ to: "/login" });
   };
   return (
     <>

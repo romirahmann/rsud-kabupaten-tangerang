@@ -11,6 +11,7 @@ const authRoutes = require("../routes/utility_routes/auth.routes");
 const masterRoutes = require("../routes/master_routes/master.routes");
 const MinioController = require("../controllers/master_controllers/MinioController");
 const documentRoutes = require("../routes/master_routes/document.routes");
+const LicenseController = require("../controllers/master_controllers/LicenseController");
 
 router.use("/oauth", authRoutes);
 router.use("/master", masterRoutes);
@@ -24,5 +25,11 @@ router.use(
 // Upload routes
 router.post("/upload-file", upload, MinioController.uploadFile);
 router.post("/upload-folder", uploadFolders, MinioController.uploadFolder);
+
+// LICENSE
+router.post("/generate-license", LicenseController.generateLicense);
+router.get("/generate-code", LicenseController.getFingerprint);
+router.get("/validate-license", LicenseController.validateLicense);
+router.post("/activation", LicenseController.activation);
 
 module.exports = router;

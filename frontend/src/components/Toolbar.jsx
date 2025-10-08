@@ -1,14 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { FaEdit, FaEye, FaFileUpload, FaUpload, FaTrash } from "react-icons/fa";
 import { Search } from "../shared/Search";
-import { useEffect, useState } from "react";
+import { useAuth } from "../store/AuthContext";
 
 export function Toolbar({ openModal, querySearch, isHomepage = false }) {
-  const [userLogin, setUserLogin] = useState([]);
-
-  useEffect(() => {
-    setUserLogin(JSON.parse(sessionStorage.getItem("user")));
-  }, []);
+  const { user } = useAuth();
 
   const handleOnChange = (e) => {
     let query = e.target.value;
@@ -25,75 +21,70 @@ export function Toolbar({ openModal, querySearch, isHomepage = false }) {
               <button
                 onClick={() => isHomepage && openModal("VIEW")}
                 disabled={!isHomepage}
-                className={`border p-2 text-xl rounded-md 
-                  ${
-                    isHomepage
-                      ? "hover:bg-primary hover:text-white text-blue-900 border-primary dark:border-secondary dark:text-white"
-                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  }`}
+                className={`border p-2 text-xl rounded-md ${
+                  isHomepage
+                    ? "hover:bg-primary hover:text-white text-blue-900 border-primary dark:border-secondary dark:text-white"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
               >
                 <FaEye />
               </button>
             </div>
 
-            {/* UPLOAD FILE */}
-            {userLogin.roleId === 1 && (
-              <div className="toolItem">
-                <button
-                  onClick={() => isHomepage && openModal("FILE")}
-                  disabled={!isHomepage}
-                  className={`border p-2 text-xl rounded-md 
-                    ${
+            {/* 3. Tambahkan "penjaga" (user &&) sebelum mengakses roleId */}
+            {/* Tombol-tombol ini sekarang hanya akan muncul jika user ada DAN rolenya = 1 */}
+            {user && user.roleId === 1 && (
+              <>
+                {/* UPLOAD FILE */}
+                <div className="toolItem">
+                  <button
+                    onClick={() => isHomepage && openModal("FILE")}
+                    disabled={!isHomepage}
+                    className={`border p-2 text-xl rounded-md ${
                       isHomepage
                         ? "hover:bg-primary hover:text-white text-green-800 border-primary dark:border-secondary dark:text-white"
                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
-                >
-                  <FaFileUpload />
-                </button>
-              </div>
-            )}
+                  >
+                    <FaFileUpload />
+                  </button>
+                </div>
 
-            {/* UPLOAD FOLDER */}
-            {userLogin.roleId === 1 && (
-              <div className="toolItem">
-                <button
-                  onClick={() => isHomepage && openModal("FOLDER")}
-                  disabled={!isHomepage}
-                  className={`border p-2 text-xl rounded-md 
-                    ${
+                {/* UPLOAD FOLDER */}
+                <div className="toolItem">
+                  <button
+                    onClick={() => isHomepage && openModal("FOLDER")}
+                    disabled={!isHomepage}
+                    className={`border p-2 text-xl rounded-md ${
                       isHomepage
                         ? "hover:bg-primary hover:text-white text-yellow-800 border-primary dark:border-secondary dark:text-white"
                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
-                >
-                  <FaUpload />
-                </button>
-              </div>
-            )}
+                  >
+                    <FaUpload />
+                  </button>
+                </div>
 
-            {/* EDIT */}
-            {userLogin.roleId === 1 && (
-              <div className="toolItem">
-                <button
-                  onClick={() => openModal("EDIT")}
-                  className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-green-800 dark:border-secondary dark:text-white"
-                >
-                  <FaEdit />
-                </button>
-              </div>
-            )}
+                {/* EDIT */}
+                <div className="toolItem">
+                  <button
+                    onClick={() => openModal("EDIT")}
+                    className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-green-800 dark:border-secondary dark:text-white"
+                  >
+                    <FaEdit />
+                  </button>
+                </div>
 
-            {/* DELETE */}
-            {userLogin.roleId === 1 && (
-              <div className="toolItem">
-                <button
-                  onClick={() => openModal("DELETE")}
-                  className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-red-800 dark:border-secondary dark:text-white"
-                >
-                  <FaTrash />
-                </button>
-              </div>
+                {/* DELETE */}
+                <div className="toolItem">
+                  <button
+                    onClick={() => openModal("DELETE")}
+                    className="border hover:bg-primary hover:text-white border-primary p-2 text-xl rounded-md text-red-800 dark:border-secondary dark:text-white"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              </>
             )}
           </div>
 

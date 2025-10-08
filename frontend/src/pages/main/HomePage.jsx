@@ -197,9 +197,11 @@ export function HomePage() {
       return;
     }
 
-    const files = Array.from(fileList);
-    const BATCH_SIZE = 50; // Kirim 50 file per permintaan
+    const files = Array.from(fileList).filter((file) =>
+      file.name.toLowerCase().endsWith(".pdf")
+    );
     const totalFiles = files.length;
+    const BATCH_SIZE = 50;
 
     setUploadProgress({ show: true, processed: 0, total: totalFiles });
 
@@ -479,26 +481,6 @@ export function HomePage() {
           onClose={() => setModalOpen({ showUploadFile: false })}
         >
           <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
-          {/* <div className="mb-4">
-            <select
-              id="source"
-              name="source"
-              className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:text-white"
-              defaultValue=""
-              onChange={handleTipeUploadFile}
-            >
-              <option value="" disabled>
-                -- Jenis Upload --
-              </option>
-              <option value="1">API</option>
-              <option value="2">PADAMA</option>
-            </select>
-          </div>
-          {uploadFileAPI ? (
-            <UploadFileAPI onSubmit={(data) => handleUploadFileAPI(data)} />
-          ) : (
-            <UploadFileForm onSubmit={(data) => handleUploadFile(data)} />
-          )} */}
         </Modal>
         {/* upload folder */}
         <Modal

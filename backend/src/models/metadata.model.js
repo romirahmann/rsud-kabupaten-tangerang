@@ -25,6 +25,33 @@ const getAll = async (querySearch) => {
   return await query;
 };
 
+const getDataByID = async (id) =>
+  await db
+    .select(
+      "m.id",
+      "m.tanggalScan",
+      "m.norm",
+      "m.noBox",
+      "m.namaPasien",
+      "m.tglLahir",
+      "m.jenisDokumen",
+      "m.kategori",
+      "m.layanan",
+      "m.title",
+      "m.file_url",
+      "m.doklin_code",
+      "m.created_date",
+      "m.created_date_string",
+      "m.layanan as service_type",
+      "m.description",
+      "d.name as doklin_name",
+      "d.id as doklin_id"
+    )
+    .from("meta_data as m")
+    .join("doklin as d", "d.code", "m.doklin_code")
+    .where("m.id", id)
+    .first();
+
 const getByID = async (id) =>
   await db.select("file_url").where("id", id).from("meta_data").first();
 
@@ -84,9 +111,18 @@ const searchMetaData = async (querySearch) => {
   return await query;
 };
 
-const insert = async (data) => await db("meta_data").insert(data);
-const update = async (id, data) =>
+const insert = async (data) => {
+  return await db("meta_data").insert({
+    ...data,
+    created_date: db.raw("UNIX_TIMESTAMP()"),
+  });
+};
+const update = async (id, data) => {
   await db("meta_data").where("id", id).update(data);
+  const updated = getDataByID(id);
+
+  return updated;
+};
 const remove = async (id) => await db("meta_data").where("id", id).delete();
 
 const checkDatabase = async (relativePath) => {
@@ -107,4 +143,5 @@ module.exports = {
   getAllByRequest,
   getByNorm,
   getByID,
+  getDataByID,
 };

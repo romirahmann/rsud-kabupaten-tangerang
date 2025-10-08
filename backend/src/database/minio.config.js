@@ -1,10 +1,10 @@
 require("dotenv").config();
 
 module.exports = {
-  endPoint: process.env.endPoint,
-  port: parseInt(process.env.minioPort, 10), // string → int
-  useSSL: process.env.useSSL === "true", // string → boolean
-  accessKey: process.env.accessKey,
-  secretKey: process.env.secretKey,
-  bucketName: process.env.bucketName,
+  endPoint: process.env.ENDPOINT,
+  port: parseInt(process.env.MINIOPORT, 10),
+  useSSL: process.env.USESSL === "true",
+  accessKey: process.env.ACCESSKEY,
+  secretKey: process.env.SECRETKEY,
+  bucketName: process.env.BUCKETNAME,
 };

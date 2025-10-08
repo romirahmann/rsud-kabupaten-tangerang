@@ -3,26 +3,36 @@ import {
   createRootRoute,
   createRouter,
   createRoute,
+  redirect,
 } from "@tanstack/react-router";
 import { z } from "zod";
 import { ProtectedRoute } from "../components/auth/ProtectedRoutes";
 import { MainLayout } from "../layouts/MainLayout";
 import { HomePage } from "../pages/main/HomePage";
-import { LoginPage } from "../pages/Auth/LoginPage";
+import { LoginPage } from "../pages/auth/LoginPage";
 import { UserPage } from "../pages/main/UserPage";
+import { LicensePage } from "../pages/auth/LicensePage";
 
 const rootRoute = createRootRoute();
 
-const protectedLayout = createRoute({
-  getParentRoute: () => rootRoute,
-  id: "protected-layout",
-  component: ProtectedRoute,
-});
-
 const mainLayout = createRoute({
-  getParentRoute: () => protectedLayout,
+  getParentRoute: () => rootRoute,
   id: "main-layout",
   component: MainLayout,
+  beforeLoad: ({ context }) => {
+    let { auth, license } = context;
+
+    if (!auth.user) {
+      throw redirect({
+        to: "/login",
+      });
+    }
+    if (!license.isLicensed) {
+      throw redirect({
+        to: "/license",
+      });
+    }
+  },
 });
 
 const homePage = createRoute({
@@ -42,9 +52,16 @@ const loginPage = createRoute({
   component: LoginPage,
 });
 
+const licensePage = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/license",
+  component: LicensePage,
+});
+
 const routeTree = rootRoute.addChildren([
-  protectedLayout.addChildren([mainLayout.addChildren([homePage, userPage])]),
+  mainLayout.addChildren([homePage, userPage]),
   loginPage,
+  licensePage,
 ]);
 
 export const router = createRouter({

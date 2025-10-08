@@ -33,7 +33,7 @@ export function LoginPage() {
         type: "warning",
       });
     }
-    console.log(formData);
+    // console.log(formData);
 
     try {
       let res = await api.post(

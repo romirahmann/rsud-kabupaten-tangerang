@@ -6,6 +6,7 @@ import { Outlet } from "@tanstack/react-router";
 
 export function ProtectedRoute() {
   const { user, loading } = useAuth();
+
   useEffect(() => {
     if (!user) {
       router.navigate({ to: "/login" });

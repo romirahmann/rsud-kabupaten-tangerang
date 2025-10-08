@@ -29,7 +29,20 @@ const updateData = api.catchAsync(async (req, res) => {
   const { id } = req.params;
   const data = req.body;
   let result = await model.update(id, data);
-  return api.success(res, { message: "Add Successfully", result });
+
+  return api.success(res, {
+    id: result.id,
+    doklin_id: result.doklin_id,
+    doklin_code: result.doklin_code,
+    doklin_name: result.doklin_name,
+    norm: result.norm,
+    title: result.title,
+    file_url: result.file_url,
+    description: result.description,
+    created_date: result.created_date,
+    created_date_string: result.created_date_string,
+    service_type: result.service_type,
+  });
 });
 
 const getSearchMeta = async (req, res) => {

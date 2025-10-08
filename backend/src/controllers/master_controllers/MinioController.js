@@ -138,10 +138,25 @@ const uploadFileAPI = async (req, res) => {
     };
 
     // console.log("➡️ File Path di MinIO:", minioFilePath);
-    await modelMeta.insert(data);
+    const itemId = await modelMeta.insert(data);
+    console.log(itemId);
     await MinioModel.uploadFile(minioFile);
 
-    return api.success(res, { message: "File uploaded", data });
+    const resData = await modelMeta.getDataByID(itemId[0]);
+
+    return api.success(res, {
+      id: resData.id,
+      doklin_id: resData.doklin_id,
+      doklin_code: resData.doklin_code,
+      doklin_name: resData.doklin_name,
+      norm: resData.norm,
+      title: resData.title,
+      file_url: resData.file_url,
+      description: resData.description,
+      created_date: resData.created_date,
+      created_date_string: resData.created_date_string,
+      service_type: resData.service_type,
+    });
   } catch (err) {
     console.error("Error uploading file:", err);
     return api.error(res, err, 500);
@@ -153,8 +168,6 @@ const uploadFolder = async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "Tidak ada file yang diunggah." });
     }
-
-    console.log("📂 Folder sedang di upload!");
 
     let paths;
     try {
@@ -231,6 +244,15 @@ const uploadFolder = async (req, res) => {
       successCount += results.filter((r) => r.value === true).length;
       failedCount += results.filter((r) => r.status === "rejected").length;
     }
+
+    console.log({
+      message: "UPLOAD COMPLETED",
+      total: files.length,
+      success: successCount,
+      skipped: skippedCount,
+      failed: failedCount,
+      failedFiles, // ⬅️ tampilkan daftar file gagal
+    });
 
     return api.success(res, {
       message: "UPLOAD COMPLETED",
@@ -391,7 +413,7 @@ const deleteFileAPI = async (req, res) => {
     let result = await modelMeta.getByID(id);
     await modelMeta.remove(id);
     await MinioModel.deleteFile(result.file_url);
-    return api.success(res, "Deleted Successfully!");
+    return api.success(res, null);
   } catch (error) {
     console.log(error);
     return api.error(res, "Deleted Failed!", 500);
@@ -406,8 +428,24 @@ const updateFileAPI = async (req, res) => {
       return api.error(res, "ID Not Found!", 401);
     }
 
-    let result = await modelMeta.update(id, data);
-    return api.success(res, result);
+    const { service_type, ...rest } = data;
+    const newData = { ...rest, layanan: service_type };
+
+    let result = await modelMeta.update(id, newData);
+
+    return api.success(res, {
+      id: result.id,
+      doklin_id: result.doklin_id,
+      doklin_code: result.doklin_code,
+      doklin_name: result.doklin_name,
+      norm: result.norm,
+      title: result.title,
+      file_url: result.file_url,
+      description: result.description,
+      created_date: result.created_date,
+      created_date_string: result.created_date_string,
+      service_type: result.service_type,
+    });
   } catch (error) {
     console.log(error);
   }
